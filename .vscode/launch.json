@@ -7,8 +7,8 @@
         {
             "type": "chrome",
             "request": "launch",
-            "name": "Open index.html",
-            "file": "c:\\Users\\aleja\\Documents\\GitHub\\pages\\index.html"
+            "name": "Open Inicio.html",
+            "file": "c:\\Users\\aleja\\Documents\\GitHub\\pages\\Inicio.html"
         }
     ]
 }
