@@ -1,48 +1,38 @@
 # Sistema de Gestión y Etiquetado de Equipos
 
-Una aplicación orientada a la estandarización y captura de datos de inventario. Está diseñada para garantizar que la información técnica de los equipos mantenga coherencia y calidad desde su registro. Este paso es fundamental para proyectos analíticos de mayor escala, como el mantenimiento predictivo o el seguimiento del ciclo de vida de los equipos.
+Aplicación para registrar inventario técnico con datos consistentes y generar etiquetas con QR para facilitar la trazabilidad de equipos en campo.
 
-## Características Principales
+**[Abrir demo interactiva en GitHub Pages](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html)**
 
-*   **Estandarización de Datos:** Asegura la consistencia de la información técnica del inventario desde el momento del registro.
-*   **Generador Dinámico de Etiquetas:** Incluye un módulo para diseñar y generar etiquetas (con códigos QR) que facilitan el seguimiento en campo.
-*   **Autenticación Segura:** Sistema de autenticación de usuarios implementado con JSON Web Tokens (JWT).
-*   **Interfaz Ligera y Rápida:** Frontend desarrollado sin frameworks pesados, optimizando la velocidad y la experiencia de usuario.
+## Qué demuestra
 
-## Tecnologías Utilizadas
+- Captura estructurada de serie, marca, estado, cliente y dirección.
+- Búsqueda y filtrado de inventario para localizar equipos rápidamente.
+- Editor visual de etiquetas con campos dinámicos, capas, QR y vista previa.
+- API con FastAPI y autenticación basada en JWT para el flujo completo.
 
-*   **Backend:** Python, FastAPI
-*   **Autenticación:** JWT (JSON Web Tokens)
-*   **Frontend:** HTML5, CSS3, Vanilla JavaScript
-*   **Generación de Etiquetas:** qrious (para códigos QR), manipulación del DOM nativa.
+## Stack
 
-## Configuración y Uso
+**Backend:** Python, FastAPI, Pydantic, SQLAlchemy, JWT
+**Frontend:** HTML, CSS y JavaScript sin framework
+**Demo:** HTML estático y QRious con datos inventados
 
-1. Clonar el repositorio y acceder al directorio del proyecto:
-   ```bash
-   git clone <repositorio>
-   cd "Equipos y etiquetas"
-   ```
+## Ejecución local
 
-2. Instalar las dependencias del backend:
-   ```bash
-   pip install fastapi uvicorn pydantic
-   ```
+```bash
+git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
+cd Alejandrolzvz.github.io/equipos-y-etiquetas
+pip install fastapi uvicorn pydantic sqlalchemy python-jose passlib[bcrypt]
+uvicorn backend.main:app --host 0.0.0.0 --port 9000
+```
 
-3. Iniciar el servidor de desarrollo:
-   En sistemas Windows, puede ejecutar el script proporcionado:
-   ```bash
-   iniciar_servidor.bat
-   ```
-   Alternativamente, ejecute directamente con uvicorn:
-   ```bash
-   uvicorn backend.main:app --host 0.0.0.0 --port 9000
-   ```
+En Windows también puedes ejecutar `iniciar_servidor.bat`. Después abre `http://localhost:9000`.
 
-4. Acceder a la aplicación a través de `http://localhost:9000`.
+La demo pública funciona sin backend y usa datos inventados. El servidor local habilita la API y la persistencia configurada en el proyecto.
 
-## Demo en Vivo
+## Archivos principales
 
-Puede probar la interfaz de generación de etiquetas en línea de forma estática en el siguiente enlace:
-
-[Ver Demo en Vivo](https://alejandrolzvz.github.io/Portafolio_AlejandroLV/Equipos%20y%20etiquetas/demo-etiquetas/index.html)
+- `backend/`: API, autenticación, modelos, esquemas y acceso a datos.
+- `frontend/`: interfaz de inventario y editor de etiquetas.
+- `demo-etiquetas/`: versión estática publicada en GitHub Pages.
+- `plantilla-etiqueta (7).json`: plantilla de referencia para el diseño.

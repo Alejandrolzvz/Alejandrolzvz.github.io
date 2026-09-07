@@ -1,63 +1,48 @@
 # Dashboard de Ventas y Eficiencia de Rutas
 
-Este proyecto fue desarrollado con el objetivo de proporcionar una solución analítica para monitorear el desempeño en campo de los equipos de ventas.
+Dashboard analítico para explorar el desempeño comercial de rutas de campo y comparar ventas, visitas y conversiones por periodo, horario, segmento y unidad de negocio.
 
-La herramienta está diseñada para facilitar la visualización del rendimiento de ventas, evaluar la eficiencia de las rutas operativas (con un enfoque especial en las variaciones de desempeño entre distintos horarios) y medir las tasas de conversión de visitas programadas a ventas concretadas.
+**[Abrir demo estática en GitHub Pages](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html)**
 
-## Características Principales
+## Qué resuelve
 
-*   **Monitoreo de Rendimiento:** Visualización en tiempo real del progreso de ventas.
-*   **Análisis de Rutas:** Evaluación detallada de la eficiencia de las rutas operativas según horarios y ubicaciones.
-*   **Tasas de Conversión:** Métricas precisas sobre la conversión de visitas a ventas efectivas.
-*   **Interfaz Dinámica:** Dashboard interactivo para explorar diferentes KPIs de negocio.
+- Convierte registros de recorridos en KPIs de ventas, visitas programadas, visitas realizadas y compras.
+- Permite analizar el desempeño por ruta, categoría, UDN, día, mes y franja horaria.
+- Facilita el ranking de rutas y la comparación entre segmentos para detectar oportunidades operativas.
+- Incluye exportación de datos a CSV y un snapshot HTML para compartir el análisis sin backend.
 
-## Tecnologías Utilizadas
+## Flujo de datos
 
-El proyecto utiliza un conjunto de tecnologías modernas y robustas:
-- **FastAPI** (y Uvicorn) para el desarrollo de la API del backend.
-- **Pandas** para el procesamiento, limpieza y análisis de datos.
-- **SQLAlchemy** para la integración con la base de datos **PostgreSQL**.
-- **HTML**, **Tailwind CSS** y **Chart.js** para la construcción de una interfaz de usuario visual e interactiva.
+`PostgreSQL -> FastAPI -> Pandas -> API JSON -> HTML / Chart.js`
 
-## Configuración y Uso
+El backend normaliza fechas y rutas, calcula agrupaciones temporales y devuelve una estructura lista para que el frontend filtre y visualice los indicadores.
 
-Para ejecutar el proyecto completo, incluyendo el backend, siga los pasos a continuación. Se requiere tener instalados Python y PostgreSQL.
+## Stack
 
-1. **Clonar el repositorio e ingresar al directorio:**
-   ```bash
-   cd sales-pipeline-dashboard
-   ```
+**Backend:** Python, FastAPI, Uvicorn, Pandas, SQLAlchemy, PostgreSQL
+**Frontend:** HTML, Tailwind CSS, JavaScript, Chart.js
+**Publicación:** HTML estático compatible con GitHub Pages
 
-2. **Crear y activar un entorno virtual:**
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # En entornos Linux o macOS
-   # venv\Scripts\activate   # En entornos Windows
-   ```
+## Ejecución local
 
-3. **Instalar las dependencias del proyecto:**
-   ```bash
-   pip install -r requirements.txt
-   ```
+Requiere Python y PostgreSQL.
 
-4. **Configurar la conexión a la base de datos:**
-   La aplicación requiere una variable de entorno para la conexión a PostgreSQL. Configure la siguiente variable con sus credenciales correspondientes:
-   ```bash
-   export DATABASE_URL="postgresql://usuario:password@localhost:5432/tu_base_de_datos"
-   ```
-   *(Si esta variable no se configura, el servidor iniciará correctamente, pero se presentarán errores al intentar obtener datos desde el frontend).*
+```bash
+cd sales-pipeline-dashboard
+python -m venv venv
+venv\Scripts\activate
+pip install -r requirements.txt
+set DATABASE_URL=postgresql://usuario:password@localhost:5432/tu_base_de_datos
+python app.py
+```
 
-5. **Iniciar el servidor:**
-   ```bash
-   python app.py
-   ```
-   *(Alternativamente, puede ejecutar: `uvicorn app:app --host 0.0.0.0 --port 8000 --reload`)*
+En Linux o macOS, sustituye la activación por `source venv/bin/activate` y configura `DATABASE_URL` con `export`.
 
-6. **Acceso a la aplicación:**
-   Una vez iniciado el servidor, acceda a `http://localhost:8000/` desde su navegador web.
+Abre `http://localhost:8000/`. La demo pública no necesita PostgreSQL: usa un snapshot con datos de ejemplo y no representa una conexión en vivo.
 
-## Demo en Vivo
+## Archivos principales
 
-Puede visualizar el diseño estático y la interfaz del dashboard sin necesidad de configurar el entorno de ejecución backend en el siguiente enlace:
-
-[Ver Demo en Vivo](https://alejandrolzvz.github.io/Portafolio_AlejandroLV/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html)
+- `app.py`: API FastAPI, consulta a PostgreSQL y agregaciones de negocio.
+- `index.html`: interfaz conectada a la API.
+- `DEMO_Dashboard_Ventas.html`: versión autocontenida para GitHub Pages.
+- `requirements.txt`: dependencias de ejecución.

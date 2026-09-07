@@ -1,69 +1,69 @@
 # Sistema de Monitoreo de Producción
 
-Una plataforma web modular y robusta diseñada para la digitalización, captura y monitoreo de parámetros de producción industrial. Este proyecto implementa una arquitectura sólida para la gestión de datos operativos, integrando flujos de trabajo ETL (Extracción, Transformación y Carga) desde formatos físicos (PDFs) hacia formatos estructurados (Excel/Base de Datos), facilitando el análisis y la toma de decisiones.
+Plataforma web para digitalizar registros de producción industrial y convertir formatos físicos en datos estructurados, consultables y listos para análisis de calidad.
 
-## Características Principales
+## Qué demuestra
 
-* **Arquitectura Modular (Blueprints):** La aplicación está dividida en submódulos lógicos por área (Ósmosis, Calidad, Lavado, Pozos, Suavizadores), lo que la hace escalable y fácil de mantener.
-* **Autenticación y Autorización (RBAC):** Sistema seguro basado en roles (Administrador, Operador, etc.) implementado con `Flask-Login`.
-* **Procesamiento de Archivos PDF:** Scripts automatizados para extraer métricas clave desde reportes en formato PDF y convertirlos a DataFrames estructurados.
-* **Contenedores Docker:** El entorno de la aplicación está completamente "dockerizado", garantizando que se pueda desplegar rápidamente de forma consistente en cualquier entorno.
-* **Interfaz Dinámica e Intuitiva:** Renderizado rápido utilizando plantillas Jinja2, diseñadas para ser amigables con el usuario final que registra los datos diariamente.
-* **Impacto en el Análisis de Datos:** Reemplaza los registros manuales desorganizados por un sistema de captura de datos validado y estructurado, permitiendo asegurar la Calidad de los Datos (Data Quality) desde el origen.
+- Extracción de tablas y métricas desde PDF hacia DataFrames y Excel.
+- Captura validada de parámetros operativos desde módulos separados por área.
+- Control de acceso por roles con Flask-Login.
+- Organización modular con Blueprints y despliegue reproducible mediante Docker.
 
-## Tecnologías Utilizadas
+## Flujo de datos
 
-* **Backend:** Python, Flask, Werkzeug
-* **Base de Datos:** SQLite, SQLAlchemy (a través de utilidades integradas)
-* **Ingeniería de Datos / ETL:** Pandas, OpenPyXL, PDFPlumber
-* **Frontend:** HTML5, CSS3, Jinja2 Templates
-* **Despliegue:** Docker, Docker Compose, Waitress (WSGI Server)
+`PDF / registro operativo -> extracción y validación -> SQLite -> aplicación Flask -> consulta y seguimiento`
 
-## Configuración y Uso
+## Stack
+
+**Backend:** Python, Flask, Werkzeug, Jinja2
+**Datos:** SQLite, Pandas, OpenPyXL, PDFPlumber
+**Despliegue:** Docker, Docker Compose y Waitress
+
+## Configuración y uso
 
 ### Opción 1: Despliegue Rápido con Docker (Recomendado)
 
 Se requiere tener instalado [Docker](https://www.docker.com/) y `docker-compose`.
 
-1. Clonar el repositorio:
+1. Clona el repositorio:
    ```bash
-   git clone <repositorio>
+   git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
    cd monitoreo-de-produccion
    ```
-2. Levantar el contenedor mediante Docker Compose:
+2. Levanta el contenedor mediante Docker Compose:
    ```bash
    cd FORMATOS
    docker-compose up -d --build
    ```
-3. La aplicación estará disponible en `http://localhost:5000`.
+3. Abre `http://localhost:5000`.
 
-### Opción 2: Instalación Local con Python
+### Opción 2: instalación local con Python
 
 Se requiere Python 3.8 o superior.
 
-1. Clonar el repositorio y navegar al directorio del proyecto:
+1. Clona el repositorio y navega al directorio de la aplicación:
    ```bash
-   git clone <repositorio>
+   git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
    cd monitoreo-de-produccion/FORMATOS/webapp
    ```
-2. Crear y activar un entorno virtual:
+2. Crea y activa un entorno virtual:
    ```bash
    python -m venv venv
    # En Windows: venv\Scripts\activate
    # En Linux/Mac: source venv/bin/activate
    ```
-3. Instalar las dependencias:
+3. Instala las dependencias:
    ```bash
    pip install -r requirements.txt
    ```
-4. Configurar las variables de entorno (utilizando `.env.example` como referencia).
-5. Inicializar la base de datos e iniciar la aplicación:
+4. Configura las variables de entorno según `.env.example`.
+5. Inicializa la base de datos e inicia la aplicación:
    ```bash
    python app.py
    ```
-6. Acceder a `http://localhost:5000` mediante un navegador web.
+6. Abre `http://localhost:5000` en el navegador.
 
-## Estructura del Proyecto
+## Estructura del proyecto
 
 ```text
 ├── FORMATOS/
@@ -78,3 +78,5 @@ Se requiere Python 3.8 o superior.
 │   └── ...
 └── README.md
 ```
+
+Los scripts de conversión y la aplicación web se mantienen separados para distinguir la preparación de datos de la captura y consulta operativa.
