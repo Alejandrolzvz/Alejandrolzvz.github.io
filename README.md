@@ -8,7 +8,7 @@ Bienvenido a mi portafolio profesional. En este repositorio documento los proyec
     Este es un proyecto integral desarrollado desde cero. El backend está construido en Python utilizando FastAPI, el procesamiento de datos se realiza con Pandas, y la persistencia se gestiona mediante SQLAlchemy conectándose a una base de datos PostgreSQL. En cuanto a la visualización, el frontend fue diseñado con HTML, Tailwind CSS para una interfaz moderna, y Chart.js para las representaciones gráficas. El objetivo de la herramienta es monitorizar el rendimiento de ventas, analizar la eficiencia de las rutas de campo y medir las tasas de conversión.
     Adicionalmente, se incluye una versión estática (`DEMO_Dashboard_Ventas.html`) en la carpeta del proyecto para visualizar el diseño e interfaz sin necesidad de ejecutar el servidor local.
 
-*   **[Sistema de Gestión y Etiquetado de Equipos](./Equipos%20y%20etiquetas/README.md):**
+*   **[Sistema de Gestión y Etiquetado de Equipos](./equipos-y-etiquetas/README.md):**
     Una aplicación orientada a la estandarización y captura de datos de inventario. Está diseñada para garantizar que la información técnica de los equipos mantenga coherencia y calidad desde su registro. Este paso es fundamental para proyectos analíticos de mayor escala, como el mantenimiento predictivo o el seguimiento del ciclo de vida de los equipos. El proyecto implementa una arquitectura basada en FastAPI para el backend, autenticación mediante JWT, y un frontend sin frameworks pesados (Vanilla JS) que incluye un generador dinámico de etiquetas.
 
 *   **[ETL de Ventas y Clientes](./ETL/README.md):**
