@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: ./webapp
+    container_name: monitoreo_webapp
+    ports:
+      - "5000:5000"
+    environment:
+      - FLASK_DEBUG=False
+      - SECRET_KEY=CAMBIA_ESTO_POR_UNA_CLAVE_SEGURA
+      - DB_PATH=/app/data/database.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped

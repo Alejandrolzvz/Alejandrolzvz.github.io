@@ -1,0 +1,17 @@
+# Raw exports and proprietary report objects; publish only portfolio/ outputs.
+clientes.csv
+direcciones.csv
+ventas.csv
+Base Recorridos acumulados.xlsx
+EBA86410
+*.FRSql
+
+# Keep generated, anonymized portfolio data visible to version control.
+!data/
+!data/*.csv
+!sql/
+!sql/*.sql
+
+# Local Python artifacts
+__pycache__/
+*.pyc

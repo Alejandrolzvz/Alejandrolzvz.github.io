@@ -1,0 +1,66 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalles Registro #{{ registro['id'] }} (Pozos)</h2>
+    <a href="{{ url_for('pozos_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-warning text-dark fw-bold">
+        Datos de Identificación del Pozo
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2"><strong>Fecha:</strong> <br> {{ registro['fecha'] }}</div>
+            <div class="col-md-3 mb-2"><strong>Planta:</strong> <br> {{ registro['planta'] or 'Planta_B' }}</div>
+            <div class="col-md-3 mb-2"><strong>Pozo Analizado:</strong> <br> Pozo {{ registro['pozo'] }}</div>
+            <div class="col-md-3 mb-2"><strong>Hora:</strong> <br> {{ registro['hora_monitoreo'] }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Resultados de Calidad
+    </div>
+    <div class="card-body">
+        <div class="row text-center mb-3">
+            <div class="col-md-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="text-muted mb-1">Conductividad</h5>
+                    <h3 class="fw-bold">{{ registro['conductividad'] or '-' }}</h3>
+                    <small>µS/cm</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="text-muted mb-1">S.T.D.</h5>
+                    <h3 class="fw-bold">{{ registro['std'] or '-' }}</h3>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="text-muted mb-1">pH</h5>
+                    <h3 class="fw-bold">{{ registro['ph'] or '-' }}</h3>
+                    <small>Unidades</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded bg-light">
+                    <h5 class="text-muted mb-1">Cloro</h5>
+                    <h3 class="fw-bold text-primary">{{ registro['cloro'] or '-' }}</h3>
+                    <small>ppm</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-footer text-muted text-end" style="font-size: 0.85rem;">
+        Registrado el: {{ registro['created_at'] }}
+    </div>
+</div>
+
+{% endblock %}

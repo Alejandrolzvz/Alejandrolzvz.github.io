@@ -1,0 +1,181 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Ósmosis (Vasos)</h2>
+    <div class="d-flex align-items-center">
+        <!-- Formulario para cambiar la fecha -->
+        <form class="d-flex align-items-center me-3" method="GET" action="{{ url_for('resumen_diario_osmosis_vasos') }}">
+            <label for="planta" class="me-2 fw-bold">Planta:</label>
+            <select name="planta" id="planta" class="form-select me-3" style="width: auto;" onchange="this.form.submit()">
+                <option value="Planta_A" {% if planta_seleccionada == 'Planta_A' %}selected{% endif %}>Planta_A</option>
+                <option value="Planta_B" {% if planta_seleccionada == 'Planta_B' %}selected{% endif %}>Planta_B</option>
+            </select>
+            <label for="fecha_q" class="me-2 fw-bold">Fecha:</label>
+            <input type="date" id="fecha_q" name="fecha" class="form-control me-2" value="{{ fecha_seleccionada }}" onchange="this.form.submit()">
+            <a href="{{ url_for('resumen_diario_osmosis_vasos') }}" class="btn btn-outline-secondary btn-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('osmosis_vasos_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Bitácora de Ósmosis Inversa (Eficiencia y Vasos) - Planta: {{ planta_seleccionada }} - Fecha: {{ fecha_seleccionada }}</span>
+        <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+    </div>
+    <div class="card-body p-0">
+        <!-- Tabla estructurada como en el formato de papel -->
+        <div class="table-responsive m-0 border-0">
+            <table class="table table-bordered align-middle mb-0 text-center" style="font-size: 0.85rem; border-color: #000;">
+                <thead class="table-light align-middle" style="border-bottom: 2px solid #000;">
+                    <tr>
+                        <th rowspan="2" class="text-start align-bottom" style="width: 15%; border-bottom: 1px solid transparent;"></th>
+                        <th colspan="3" class="fw-bold" style="border-bottom: 2px solid #000;">6:00 A.M. a 10:00 A.M.</th>
+                        <th colspan="3" class="fw-bold" style="border-bottom: 2px solid #000;">11:00 A.M. a 3:00 P.M.</th>
+                        <th colspan="3" class="fw-bold" style="border-bottom: 2px solid #000;">4:00 P.M. a 8:00 P.M.</th>
+                    </tr>
+                    <tr style="font-size: 0.75rem;">
+                        <!-- Titulos vacios para STDs según la imagen y Eficiencia/Rango -->
+                        <th class="fw-normal"></th>
+                        <th class="fw-normal">Eficiencia %</th>
+                        <th class="fw-normal">Rango %</th>
+
+                        <th class="fw-normal"></th>
+                        <th class="fw-normal">Eficiencia %</th>
+                        <th class="fw-normal">Rango %</th>
+
+                        <th class="fw-normal"></th>
+                        <th class="fw-normal">Eficiencia %</th>
+                        <th class="fw-normal">Rango %</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr style="font-size: 0.75rem; font-style: italic;">
+                        <td class="text-start border-0 fw-bold">S.T.D. (ppm)</td>
+                        <td colspan="9" class="border-0"></td>
+                    </tr>
+                    
+                    {% set rows_vasos = [
+                        ('Vaso 1', 'vaso1'),
+                        ('Vaso 2', 'vaso2'),
+                        ('Vaso 3', 'vaso3'),
+                        ('Vaso 4', 'vaso4'),
+                        ('Vaso 5', 'vaso5'),
+                        ('Final', 'final')
+                    ] %}
+                    
+                    {% for label, key in rows_vasos %}
+                    <tr>
+                        <td class="text-start">{{ label }}</td>
+                        <!-- Turno 1 -->
+                        <td>{{ t1['sdt_'~key] if t1 else '' }}</td>
+                        <td>{{ t1['efi_'~key] if t1 else '' }}</td>
+                        <td>{{ t1['rango_'~key] if t1 else '' }}</td>
+                        <!-- Turno 2 -->
+                        <td>{{ t2['sdt_'~key] if t2 else '' }}</td>
+                        <td>{{ t2['efi_'~key] if t2 else '' }}</td>
+                        <td>{{ t2['rango_'~key] if t2 else '' }}</td>
+                        <!-- Turno 3 -->
+                        <td>{{ t3['sdt_'~key] if t3 else '' }}</td>
+                        <td>{{ t3['efi_'~key] if t3 else '' }}</td>
+                        <td>{{ t3['rango_'~key] if t3 else '' }}</td>
+                    </tr>
+                    {% endfor %}
+
+                    <!-- Fila visual de separacion como en la imagen -->
+                    <tr><td colspan="10" style="padding: 2px;"></td></tr>
+                    
+                    {% set rows_rechazos = [
+                        ('Rechazo vasos 1 y 2', 'rechazo12'),
+                        ('Rechazo Vaso 3', 'rechazo3'),
+                        ('Rechazo Vaso 4', 'rechazo4'),
+                        ('Rechazo Vaso 5', 'rechazo5')
+                    ] %}
+
+                    {% for label, key in rows_rechazos %}
+                    <tr>
+                        <td class="text-start">{{ label }}</td>
+                        <!-- Turno 1 -->
+                        <td>{{ t1['sdt_'~key] if t1 else '' }}</td>
+                        <td>{{ t1['efi_'~key] if t1 else '' }}</td>
+                        <td>{{ t1['rango_'~key] if t1 else '' }}</td>
+                        <!-- Turno 2 -->
+                        <td>{{ t2['sdt_'~key] if t2 else '' }}</td>
+                        <td>{{ t2['efi_'~key] if t2 else '' }}</td>
+                        <td>{{ t2['rango_'~key] if t2 else '' }}</td>
+                        <!-- Turno 3 -->
+                        <td>{{ t3['sdt_'~key] if t3 else '' }}</td>
+                        <td>{{ t3['efi_'~key] if t3 else '' }}</td>
+                        <td>{{ t3['rango_'~key] if t3 else '' }}</td>
+                    </tr>
+                    {% endfor %}
+                    
+                    <tr><td colspan="10" style="padding: 2px;"></td></tr>
+
+                    <tr class="fw-bold">
+                        <td class="text-start font-italic">Entrada de Osmosis</td>
+                        
+                        <td class="text-start border-end-0">SDT: {{ t1['entrada_sdt'] if t1 else '' }}</td>
+                        <td colspan="2" class="text-start border-start-0">DT: {{ t1['entrada_dt'] if t1 else '' }}</td>
+                        
+                        <td class="text-start border-end-0">SDT: {{ t2['entrada_sdt'] if t2 else '' }}</td>
+                        <td colspan="2" class="text-start border-start-0">DT: {{ t2['entrada_dt'] if t2 else '' }}</td>
+                        
+                        <td class="text-start border-end-0">SDT: {{ t3['entrada_sdt'] if t3 else '' }}</td>
+                        <td colspan="2" class="text-start border-start-0">DT: {{ t3['entrada_dt'] if t3 else '' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <!-- OBSERVACIONES Y FIRMAS -->
+            <div class="p-3" style="border: 1px solid #000; border-top: none;">
+                <div class="d-flex mb-4">
+                    <strong class="me-2" style="font-size: 1.1rem;">Observaciones:</strong>
+                    <div class="flex-grow-1" style="border-bottom: 1px solid #000;">
+                        {{ obs }}
+                    </div>
+                </div>
+                
+                <div class="row text-center mt-5" style="font-size: 0.85rem;">
+                    <div class="col-3">
+                        <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 5px;">{{ firma1 }}</div>
+                        <div>Nombre y Firma</div>
+                        <div>Jefe de 1er Turno</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 5px;">{{ firma2 }}</div>
+                        <div>Nombre y Firma</div>
+                        <div>Jefe de 2do Turno</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 5px;">{{ firma3 }}</div>
+                        <div>Nombre y Firma</div>
+                        <div>Sub Jefe de Producción y Calidad</div>
+                    </div>
+                    <div class="col-3">
+                        <div style="border-bottom: 1px solid #000; height: 30px; margin-bottom: 5px;">{{ firma4 }}</div>
+                        <div>Nombre y Firma</div>
+                        <div>Jefe de Producción y Calidad</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    body { padding: 0 !important; margin: 0 !important; background-color: white !important; }
+    nav, header, footer, .sidebar, .btn, form, a.btn, a { display: none !important; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    h2 { display: none !important; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border: 1px solid black !important; }
+    .card { border: none !important; box-shadow: none !important; margin: 0 !important; }
+    table { font-size: 0.8rem !important; width: 100% !important; color: black !important; border-collapse: collapse !important; border: 1px solid #000 !important; }
+    th, td { border: 1px solid #000 !important; padding: 5px !important; }
+    .text-primary, .text-danger, .text-success, .text-warning, .text-info { color: black !important; }
+}
+</style>
+{% endblock %}

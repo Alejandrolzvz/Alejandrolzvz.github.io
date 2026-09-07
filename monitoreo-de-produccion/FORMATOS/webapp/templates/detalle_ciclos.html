@@ -1,0 +1,115 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2>Detalle del Ciclo de Regeneración</h2>
+    <div>
+        <a href="{{ url_for('ciclos_index') }}" class="btn btn-outline-secondary">Regresar</a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-info mb-4">
+    <div class="card-header bg-info text-white">
+        <h5 class="mb-0 fw-bold">
+            Ciclo: Suavizador {{ registro['numero_suavizador'] }} <span class="badge bg-light text-info float-end">{{ registro['estado'] }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row text-center mb-4">
+            <div class="col-md-3">
+                <span class="text-muted text-uppercase small">ID del Registro</span><br>
+                <span class="fs-4 fw-bold">{{ registro['id'] }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted text-uppercase small">Fecha</span><br>
+                <span class="fs-4 fw-bold">{{ registro['fecha'] }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted text-uppercase small">Planta</span><br>
+                <span class="fs-4 fw-bold text-primary">{{ registro['planta'] or 'N/A' }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted text-uppercase small">Tiempo Total</span><br>
+                <span class="fs-4 fw-bold text-success">{{ registro['tiempo_total'] or '-' }}</span>
+            </div>
+        </div>
+
+        <h5 class="text-info border-bottom pb-2">Desglose de Fases</h5>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 25%">Fase</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Duración</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="fw-bold">1. Retro lavado</td>
+                        <td id="ini_1">{{ registro['inicio_retrolavado'] or '-' }}</td>
+                        <td id="fin_1">{{ registro['fin_retrolavado'] or '-' }}</td>
+                        <td id="dur_1" class="text-muted fw-bold"></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">2. Regenerado o succión</td>
+                        <td id="ini_2">{{ registro['inicio_regenerado'] or '-' }}</td>
+                        <td id="fin_2">{{ registro['fin_regenerado'] or '-' }}</td>
+                        <td id="dur_2" class="text-muted fw-bold"></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">3. Enjuage lento</td>
+                        <td id="ini_3">{{ registro['inicio_enjuage_lento'] or '-' }}</td>
+                        <td id="fin_3">{{ registro['fin_enjuage_lento'] or '-' }}</td>
+                        <td id="dur_3" class="text-muted fw-bold"></td>
+                    </tr>
+                    <tr>
+                        <td class="fw-bold">4. Enjuage rápido</td>
+                        <td id="ini_4">{{ registro['inicio_enjuage_rapido'] or '-' }}</td>
+                        <td id="fin_4">{{ registro['fin_enjuage_rapido'] or '-' }}</td>
+                        <td id="dur_4" class="text-muted fw-bold"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+    </div>
+    </div>
+    <div class="card-footer text-muted text-end small">
+        Registrado el: {{ registro['created_at'] }}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    function calculateDiff(startVal, endVal) {
+        if (!startVal || !endVal || startVal === '-' || endVal === '-') return '-';
+        const [h1, m1] = startVal.split(':').map(Number);
+        const [h2, m2] = endVal.split(':').map(Number);
+        
+        let min1 = h1 * 60 + m1;
+        let min2 = h2 * 60 + m2;
+        if (min2 < min1) min2 += 24 * 60;
+        
+        let diff = min2 - min1;
+        let hrs = Math.floor(diff / 60);
+        let mins = diff % 60;
+
+        if (hrs === 0) return `${mins} min`;
+        if (mins === 0) return `${hrs} hrs`;
+        return `${hrs} hrs ${mins} min`;
+    }
+
+    for (let i = 1; i <= 4; i++) {
+        const iniNode = document.getElementById('ini_' + i);
+        const finNode = document.getElementById('fin_' + i);
+        const durNode = document.getElementById('dur_' + i);
+        
+        if (iniNode && finNode && durNode) {
+            durNode.innerText = calculateDiff(iniNode.innerText.trim(), finNode.innerText.trim());
+        }
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,165 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<h2 class="mb-4">Registro de Ósmosis: S.T.D. y Eficiencia por Vasos (Parte 2)</h2>
+
+<form method="POST" action="{{ url_for('nuevo_registro_osmosis_vasos') }}" class="needs-validation">
+
+    <!-- DATOS GENERALES -->
+    <div class="card bg-light mb-4">
+        <div class="card-header fw-bold">1. Datos Generales del Turno</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label>Planta</label>
+                    <select name="planta" class="form-select" required>
+                        <option value="">Selecciona la Planta...</option>
+                        <option value="Planta_A">Planta_A</option>
+                        <option value="Planta_B">Planta_B</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label>Fecha</label>
+                    <input type="date" name="fecha" class="form-control" value="{{ hoy }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label>Turno Monitoreado</label>
+                    <select name="turno" class="form-select" required>
+                        <option value="">Selecciona el turno...</option>
+                        <option value="6:00 A.M. a 10:00 A.M.">6:00 A.M. a 10:00 A.M.</option>
+                        <option value="11:00 A.M. a 3:00 P.M.">11:00 A.M. a 3:00 P.M.</option>
+                        <option value="4:00 P.M. a 8:00 P.M.">4:00 P.M. a 8:00 P.M.</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ENTRADA OSMOSIS -->
+    <div class="card mb-4 border-info">
+        <div class="card-header fw-bold bg-info text-white">2. Entrada de Ósmosis (Base para Eficiencia)</div>
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label>SDT (Entrada)</label>
+                    <input type="number" step="0.1" name="entrada_sdt" id="entrada_sdt" class="form-control" placeholder="Ej. 60.5">
+                    <small class="text-muted">Se usa para calcular la Eficiencia automáticamente.</small>
+                </div>
+                <div class="col-md-6">
+                    <label>DT (Entrada)</label>
+                    <input type="number" step="0.1" name="entrada_dt" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- VALORES POR VASOS -->
+    <div class="card mb-4">
+        <div class="card-header fw-bold bg-white text-primary">3. Valores S.T.D. y Eficiencias</div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-bordered mb-0 text-center align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-start">Parámetro</th>
+                            <th>S.T.D. (ppm)</th>
+                            <th>Eficiencia %</th>
+                            <th>Rango %</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Vasos Principales -->
+                        {% set vasos = [('vaso1', 'Vaso 1'), ('vaso2', 'Vaso 2'), ('vaso3', 'Vaso 3'), ('vaso4', 'Vaso 4'), ('vaso5', 'Vaso 5'), ('final', 'Final')] %}
+                        {% for key, label in vasos %}
+                        <tr>
+                            <td class="text-start fw-bold">{{ label }}</td>
+                            <td><input type="number" step="0.1" name="sdt_{{ key }}" id="sdt_{{ key }}" class="form-control calc-sdt"></td>
+                            <td><input type="number" step="0.1" name="efi_{{ key }}" id="efi_{{ key }}" class="form-control"></td>
+                            <td><input type="text" name="rango_{{ key }}" class="form-control text-center text-muted" value="100-90" readonly></td>
+                        </tr>
+                        {% endfor %}
+
+                        <!-- Rechazos -->
+                        <tr class="table-secondary"><td colspan="4" class="text-start fw-bold">Rechazos</td></tr>
+                        {% set rechazos = [('rechazo12', 'Rechazo vasos 1 y 2'), ('rechazo3', 'Rechazo Vaso 3'), ('rechazo4', 'Rechazo Vaso 4'), ('rechazo5', 'Rechazo Vaso 5')] %}
+                        {% for key, label in rechazos %}
+                        <tr>
+                            <td class="text-start fw-bold">{{ label }}</td>
+                            <td><input type="number" step="0.1" name="sdt_{{ key }}" id="sdt_{{ key }}" class="form-control calc-sdt"></td>
+                            <td><input type="number" step="0.1" name="efi_{{ key }}" id="efi_{{ key }}" class="form-control"></td>
+                            <td><input type="text" name="rango_{{ key }}" class="form-control text-center text-muted" value="100-90" readonly></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- FIRMAS Y OBSERVACIONES -->
+    <div class="card mb-4 bg-light">
+        <div class="card-header fw-bold">4. Observaciones y Firmas</div>
+        <div class="card-body">
+            <div class="mb-4">
+                <label class="fw-bold">Observaciones:</label>
+                <textarea name="observaciones" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label>Firma Jefe de 1er Turno</label>
+                    <input type="text" name="firma_jefe_turno_1" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label>Firma Jefe de 2do Turno</label>
+                    <input type="text" name="firma_jefe_turno_2" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label>Firma Sub Jefe Prod/Cal</label>
+                    <input type="text" name="firma_subjefe_calidad" class="form-control">
+                </div>
+                <div class="col-md-3">
+                    <label>Firma Jefe Prod/Cal</label>
+                    <input type="text" name="firma_jefe_calidad" class="form-control">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="mb-5 text-end">
+        <a href="{{ url_for('osmosis_vasos_index') }}" class="btn btn-secondary me-2">Cancelar</a>
+        <button type="submit" class="btn btn-success btn-lg">💾 Guardar Registro de Turno</button>
+    </div>
+
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const entradaSdtInput = document.getElementById('entrada_sdt');
+    const sdtInputs = document.querySelectorAll('.calc-sdt');
+
+    function calcularEficiencia() {
+        const entrada = parseFloat(entradaSdtInput.value);
+        if (isNaN(entrada) || entrada <= 0) return;
+
+        sdtInputs.forEach(function(sdtInput) {
+            const val = parseFloat(sdtInput.value);
+            // La ID del input de eficiencia coincide con la del STD pero empieza con efi_
+            const efiId = sdtInput.id.replace('sdt_', 'efi_');
+            const efiInput = document.getElementById(efiId);
+
+            if (!isNaN(val) && efiInput) {
+                // Formula: (Entrada - Salida) / Entrada * 100
+                // Asumimos que para SDT de salida esto aplica. Si es rechazo tal vez sea diferente, 
+                // pero lo autocalculamos y dejamos sobreescribir.
+                const efi = ((entrada - val) / entrada) * 100;
+                efiInput.value = efi.toFixed(2);
+            }
+        });
+    }
+
+    entradaSdtInput.addEventListener('input', calcularEficiencia);
+    sdtInputs.forEach(input => input.addEventListener('input', calcularEficiencia));
+});
+</script>
+{% endblock %}

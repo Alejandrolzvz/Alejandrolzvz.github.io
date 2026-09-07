@@ -1,0 +1,139 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalle Registro #{{ registro['id'] }} (Tanque y Lavado)</h2>
+    <a href="{{ url_for('calidad_lavado_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        <i class="bi bi-info-circle"></i> Datos Generales
+    </div>
+    <div class="card-body bg-light">
+        <div class="row text-center mb-3">
+            <div class="col-md-3">
+                <span class="text-muted d-block small">Fecha</span>
+                <span class="fs-5 fw-bold">{{ registro['fecha'] }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block small">Planta</span>
+                <span class="fs-5 fw-bold">{{ registro['planta'] }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block small">Nave</span>
+                <span class="fs-5 fw-bold">{{ registro['nave'] }}</span>
+            </div>
+            <div class="col-md-3">
+                <span class="text-muted d-block small">Hora de Monitoreo</span>
+                <span class="fs-5 fw-bold text-primary">{{ registro['hora_monitoreo'] }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Producto Final / Tanque -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-primary text-white fw-bold">
+                (5) Producto Final / Tanque
+            </div>
+            <div class="card-body">
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        pH <span class="badge bg-light text-dark fs-6">{{ registro['tanque_ph'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        S.T.D. <span class="badge bg-light text-dark fs-6">{{ registro['tanque_std'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Conductividad <span class="badge bg-light text-dark fs-6">{{ registro['tanque_conductividad'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Dureza <span class="badge bg-light text-dark fs-6">{{ registro['tanque_dureza'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Ozono <span class="badge bg-light text-dark fs-6">{{ registro['tanque_ozono'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        Cloro Residual <span class="badge bg-light text-dark fs-6">{{ registro['tanque_cloro'] or '--' }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lavado de Envases -->
+    <div class="col-md-6">
+        <div class="card shadow-sm h-100">
+            <div class="card-header bg-success text-white fw-bold">
+                (6) Lavado de Envases / Máquina Lavadora
+            </div>
+            <div class="card-body">
+                <h6 class="fw-bold text-secondary border-bottom pb-2">Lavado Alcalino</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>pH:</span> <span class="fw-bold">{{ registro['alcalino_ph'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Concentración G3:</span> <span class="fw-bold">{{ registro['alcalino_g3'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Temperatura:</span> <span class="fw-bold">{{ registro['alcalino_temperatura'] or '--' }}</span>
+                    </li>
+                </ul>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2">Lavado Ácido</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>pH:</span> <span class="fw-bold">{{ registro['acido_ph'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Concentración Ácido PL:</span> <span class="fw-bold">{{ registro['acido_pl'] or '--' }}</span>
+                    </li>
+                </ul>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2">Enjuague Final (Tanque)</h6>
+                <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>pH:</span> <span class="fw-bold">{{ registro['enjuague_ph'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Ozono:</span> <span class="fw-bold">{{ registro['enjuague_ozono'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Cloro residual:</span> <span class="fw-bold">{{ registro['enjuague_cloro'] or '--' }}</span>
+                    </li>
+                </ul>
+
+                <h6 class="fw-bold text-secondary border-bottom pb-2">Filtro de Carbón y Tapas</h6>
+                <ul class="list-group list-group-flush">
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>C. Residual Inicial:</span> <span class="fw-bold">{{ registro['carbon_cloro_inicial'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>C. Residual PT:</span> <span class="fw-bold">{{ registro['carbon_cloro_pt'] or '--' }}</span>
+                    </li>
+                    <li class="list-group-item py-1 border-0 d-flex justify-content-between">
+                        <span>Desinfección Tapas (Cloro):</span> <span class="fw-bold">{{ registro['tapas_cloro'] or '--' }}</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-secondary text-white fw-bold">Observaciones</div>
+    <div class="card-body">
+        <p class="mb-0">{{ registro['observaciones'] or 'Sin observaciones registradas.' }}</p>
+    </div>
+</div>
+
+<div class="text-center text-muted small mt-4">
+    Registro creado en sistema: {{ registro['created_at'] }}
+</div>
+{% endblock %}

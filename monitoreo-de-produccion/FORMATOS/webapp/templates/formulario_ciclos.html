@@ -1,0 +1,199 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="card shadow-sm border-info">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0 fw-bold">Ciclo de Suavizador {{ suavizador_id }} - Fecha: {{ hoy }}</h4>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Llene las fases en orden. Al ingresar la hora final y guardar, se habilitará la siguiente fase. No puede adelantar pasos.</p>
+        
+        <form action="{{ url_for('continuar_ciclo') }}" method="POST">
+            <input type="hidden" name="fecha" value="{{ hoy }}">
+            <input type="hidden" name="numero_suavizador" value="{{ suavizador_id }}">
+            <input type="hidden" name="planta" value="{{ planta }}">
+
+            {% set s1_done = ciclo and ciclo['fin_retrolavado'] %}
+            {% set s2_done = ciclo and ciclo['fin_regenerado'] %}
+            {% set s3_done = ciclo and ciclo['fin_enjuage_lento'] %}
+            {% set s4_done = ciclo and ciclo['fin_enjuage_rapido'] %}
+
+            <!-- Fase 1: Retro lavado -->
+            <div class="card mb-3 {% if s1_done %}border-success{% else %}border-primary{% endif %}">
+                <div class="card-header {% if s1_done %}bg-success{% else %}bg-primary{% endif %} text-white fw-bold">
+                    1. Retro lavado
+                    {% if s1_done %}<i class="bi bi-check-circle float-end"></i>{% endif %}
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Inicio</label>
+                        <input type="time" class="form-control" name="inicio_retrolavado" id="inicio_retrolavado" 
+                            {% if ciclo and ciclo['inicio_retrolavado'] %} value="{{ ciclo['inicio_retrolavado'] }}" readonly {% else %} required {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Fin</label>
+                        <input type="time" class="form-control" name="fin_retrolavado" id="fin_retrolavado"
+                            {% if s1_done %} value="{{ ciclo['fin_retrolavado'] }}" readonly {% else %} required {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold text-muted">Duración Fase</label>
+                        <input type="text" class="form-control bg-light text-muted" id="duracion_retrolavado" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 2: Regenerado -->
+            <div class="card mb-3 {% if s2_done %}border-success{% elif s1_done and not s2_done %}border-primary{% else %}border-secondary text-muted{% endif %}">
+                <div class="card-header {% if s2_done %}bg-success{% elif s1_done and not s2_done %}bg-primary{% else %}bg-secondary{% endif %} text-white fw-bold">
+                    2. Regenerado o succión
+                    {% if s2_done %}<i class="bi bi-check-circle float-end"></i>{% endif %}
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Inicio</label>
+                        <input type="time" class="form-control" name="inicio_regenerado" id="inicio_regenerado"
+                            {% if ciclo and ciclo['inicio_regenerado'] %} value="{{ ciclo['inicio_regenerado'] }}" readonly 
+                            {% elif s1_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Fin</label>
+                        <input type="time" class="form-control" name="fin_regenerado" id="fin_regenerado"
+                            {% if s2_done %} value="{{ ciclo['fin_regenerado'] }}" readonly 
+                            {% elif s1_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold text-muted">Duración Fase</label>
+                        <input type="text" class="form-control bg-light text-muted" id="duracion_regenerado" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 3: Enjuage Lento -->
+            <div class="card mb-3 {% if s3_done %}border-success{% elif s2_done and not s3_done %}border-primary{% else %}border-secondary text-muted{% endif %}">
+                <div class="card-header {% if s3_done %}bg-success{% elif s2_done and not s3_done %}bg-primary{% else %}bg-secondary{% endif %} text-white fw-bold">
+                    3. Enjuage lento
+                    {% if s3_done %}<i class="bi bi-check-circle float-end"></i>{% endif %}
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Inicio</label>
+                        <input type="time" class="form-control" name="inicio_enjuage_lento" id="inicio_enjuage_lento"
+                            {% if ciclo and ciclo['inicio_enjuage_lento'] %} value="{{ ciclo['inicio_enjuage_lento'] }}" readonly 
+                            {% elif s2_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold">Hora Fin</label>
+                        <input type="time" class="form-control" name="fin_enjuage_lento" id="fin_enjuage_lento"
+                            {% if s3_done %} value="{{ ciclo['fin_enjuage_lento'] }}" readonly 
+                            {% elif s2_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-4 mb-2">
+                        <label class="form-label fw-bold text-muted">Duración Fase</label>
+                        <input type="text" class="form-control bg-light text-muted" id="duracion_enjuage_lento" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fase 4: Enjuage Rápido -->
+            <div class="card mb-4 {% if s4_done %}border-success{% elif s3_done and not s4_done %}border-primary{% else %}border-secondary text-muted{% endif %}">
+                <div class="card-header {% if s4_done %}bg-success{% elif s3_done and not s4_done %}bg-primary{% else %}bg-secondary{% endif %} text-white fw-bold">
+                    4. Enjuage rápido
+                    {% if s4_done %}<i class="bi bi-check-circle float-end"></i>{% endif %}
+                </div>
+                <div class="card-body row">
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label fw-bold">Hora Inicio</label>
+                        <input type="time" class="form-control" name="inicio_enjuage_rapido" id="inicio_enjuage_rapido"
+                            {% if ciclo and ciclo['inicio_enjuage_rapido'] %} value="{{ ciclo['inicio_enjuage_rapido'] }}" readonly 
+                            {% elif s3_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label fw-bold">Hora Fin</label>
+                        <input type="time" class="form-control" name="fin_enjuage_rapido" id="fin_enjuage_rapido"
+                            {% if s4_done %} value="{{ ciclo['fin_enjuage_rapido'] }}" readonly 
+                            {% elif s3_done %} required {% else %} readonly {% endif %}>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label fw-bold text-muted">Duración Fase</label>
+                        <input type="text" class="form-control bg-light text-muted" id="duracion_enjuage_rapido" readonly>
+                    </div>
+                    <div class="col-md-3 mb-2">
+                        <label class="form-label fw-bold text-success">Tiempo Total del Ciclo</label>
+                        <input type="text" class="form-control border-success text-success fw-bold" name="tiempo_total" id="tiempo_total" 
+                            value="{{ ciclo['tiempo_total'] if ciclo and ciclo['tiempo_total'] else '' }}" placeholder="Terminado" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-end">
+                <a href="{{ url_for('ciclos_index') }}" class="btn btn-secondary me-2">Regresar</a>
+                {% if not s4_done %}
+                <button type="submit" class="btn btn-info text-white fw-bold btn-lg">
+                    <i class="bi bi-save"></i> Guardar Progreso
+                </button>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+
+    function calculateDiff(startVal, endVal) {
+        if (!startVal || !endVal) return '';
+        const [h1, m1] = startVal.split(':').map(Number);
+        const [h2, m2] = endVal.split(':').map(Number);
+        
+        let min1 = h1 * 60 + m1;
+        let min2 = h2 * 60 + m2;
+        if (min2 < min1) min2 += 24 * 60;
+        
+        let diff = min2 - min1;
+        let hrs = Math.floor(diff / 60);
+        let mins = diff % 60;
+
+        if (hrs === 0) return `${mins} min`;
+        if (mins === 0) return `${hrs} hrs`;
+        return `${hrs} hrs ${mins} min`;
+    }
+
+    const phases = [
+        ['inicio_retrolavado', 'fin_retrolavado', 'duracion_retrolavado'],
+        ['inicio_regenerado', 'fin_regenerado', 'duracion_regenerado'],
+        ['inicio_enjuage_lento', 'fin_enjuage_lento', 'duracion_enjuage_lento'],
+        ['inicio_enjuage_rapido', 'fin_enjuage_rapido', 'duracion_enjuage_rapido']
+    ];
+
+    function updateAllPhases() {
+        phases.forEach(([startId, endId, outId]) => {
+            const startNode = document.getElementById(startId);
+            const endNode = document.getElementById(endId);
+            const outNode = document.getElementById(outId);
+            if (startNode && endNode && outNode) {
+                outNode.value = calculateDiff(startNode.value, endNode.value);
+            }
+        });
+        
+        const startAbsNode = document.getElementById('inicio_retrolavado');
+        const endAbsNode = document.getElementById('fin_enjuage_rapido');
+        const totalNode = document.getElementById('tiempo_total');
+        // Total should only be printed if both nodes are valid
+        if (startAbsNode && endAbsNode && totalNode && startAbsNode.value && endAbsNode.value) {
+            totalNode.value = calculateDiff(startAbsNode.value, endAbsNode.value);
+        }
+    }
+
+    const inputsToWatch = [];
+    phases.forEach(([startId, endId]) => {
+        let el1 = document.querySelector(`input[name="${startId}"]`);
+        let el2 = document.querySelector(`input[name="${endId}"]`);
+        if (el1) inputsToWatch.push(el1);
+        if (el2) inputsToWatch.push(el2);
+    });
+
+    inputsToWatch.forEach(el => el.addEventListener('change', updateAllPhases));
+    updateAllPhases();
+});
+</script>
+{% endblock %}

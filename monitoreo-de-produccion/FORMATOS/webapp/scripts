@@ -1,0 +1,62 @@
+import sqlite3
+
+def init_db():
+    conn = sqlite3.connect('database.db')
+    cursor = conn.cursor()
+    
+    # Crear tabla principal para los registros
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS registro_osmosis (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            fecha DATE NOT NULL,
+            planta TEXT NOT NULL,
+            hora_monitoreo TEXT NOT NULL,
+            
+            -- Estatus
+            estatus_equipo TEXT,
+            
+            -- Presiones
+            presion_arranque TEXT,
+            presion_agua_cruda TEXT,
+            presion_pre_filtracion TEXT,
+            presion_post_filtracion TEXT,
+            presion_pre_membranas TEXT,
+            presion_post_membranas TEXT,
+            presion_bombas TEXT,
+            
+            -- Rotámetros
+            rotametro_productos TEXT,
+            rotametro_rechazo TEXT,
+            
+            -- Sensores
+            sensor_ph TEXT,
+            sensor_std TEXT,
+            
+            -- Lectores
+            amperimetro TEXT,
+            horometro TEXT,
+            
+            -- Presión en Filtros
+            filtro_arena TEXT,
+            filtro_carbon TEXT,
+            suavizador_num TEXT,
+            entrada_suavizador TEXT,
+            salida_suavizador TEXT,
+            
+            -- Control de Vasos y Eficiencias (por simplificar, un campo para la lectura de cada bloque)
+            sdt_vaso1 TEXT, sdt_vaso2 TEXT, sdt_vaso3 TEXT, sdt_vaso4 TEXT, sdt_vaso5 TEXT, sdt_final TEXT,
+            entrada_osmosis_sdt TEXT,
+            entrada_osmosis_dt TEXT,
+            
+            observaciones TEXT,
+            
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    ''')
+    
+    conn.commit()
+    conn.close()
+    print("Base de datos inicializada correctamente.")
+
+if __name__ == '__main__':
+    init_db()

@@ -1,0 +1,116 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Calidad (Cisternas y Garrafón)</h2>
+    
+    <div class="d-flex align-items-center">
+        <!-- Formulario para cambiar la fecha -->
+        <form class="d-flex align-items-center me-3" method="GET" action="{{ url_for('resumen_calidad') }}">
+            <label for="fecha_q" class="me-2 fw-bold">Fecha:</label>
+            <input type="date" id="fecha_q" name="fecha" class="form-control me-2" value="{{ fecha_seleccionada }}" onchange="this.form.submit()">
+            <a href="{{ url_for('resumen_calidad') }}" class="btn btn-outline-secondary btn-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('calidad_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Reporte Consolidado: {{ fecha_seleccionada }}</span>
+        <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+    </div>
+    <div class="card-body p-0">
+        <!-- Tabla con scroll horizontal y fila transpuesta -->
+        <div class="table-responsive m-0 border-0" style="max-height: 700px; overflow-y: auto;">
+            <table class="table table-bordered table-striped table-hover align-middle mb-0 text-center" style="min-width: 800px; font-size: 0.85rem;">
+                <thead class="table-secondary sticky-top">
+                    <tr>
+                        <th class="text-start bg-light sticky-col" style="min-width: 200px; z-index: 10;">Parámetro / Hora</th>
+                        {% for reg in registros %}
+                            <th>{{ reg['hora_monitoreo'] }}<br><small class="text-muted fw-normal">{{ reg['nave'] }}</small></th>
+                        {% else %}
+                            <th>Sin registros</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- INFORMACIÓN GENERAL -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Información General</td></tr>
+                    <tr><td class="text-start fw-bold bg-light sticky-col">Planta</td>{% for reg in registros %}<td>{{ reg['planta'] }}</td>{% endfor %}</tr>
+
+                    <!-- CLORO Y PH (CISTERNA Y ADUANA) -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Cisternas y Aduana</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">C1: Cloro</td>{% for reg in registros %} <td>{{ reg['c1_cloro'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">C1: pH</td>{% for reg in registros %} <td>{{ reg['c1_ph'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">C2: Cloro</td>{% for reg in registros %} <td>{{ reg['c2_cloro'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">C2: pH</td>{% for reg in registros %} <td>{{ reg['c2_ph'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Aduana: Cloro</td>{% for reg in registros %} <td class="text-primary">{{ reg['aduana_cloro'] or '-' }}</td> {% endfor %}</tr>
+
+                    <!-- PRODUCTO FINAL (POST FILTRACION) -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Producto Final (PF)</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">pH</td>{% for reg in registros %} <td><strong>{{ reg['pf_ph'] or '-' }}</strong></td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">S.T.D</td>{% for reg in registros %} <td>{{ reg['pf_std'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Conductividad</td>{% for reg in registros %} <td>{{ reg['pf_conductividad'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Dureza</td>{% for reg in registros %} <td>{{ reg['pf_dureza'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Ozono</td>{% for reg in registros %} <td>{{ reg['pf_ozono'] or '-' }}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Cloro</td>{% for reg in registros %} <td class="text-primary fw-bold">{{ reg['pf_cloro'] or '-' }}</td> {% endfor %}</tr>
+
+                    <!-- LÁMPARAS UV -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Lámparas UV</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Lamp 1: Estado</td>
+                        {% for reg in registros %} 
+                            <td>
+                                {% if reg['lamp1_encendido'] == 'Encendido' %}<span class="badge bg-success">ON</span>
+                                {% else %}<span class="badge bg-secondary">OFF</span>{% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    <tr><td class="text-start bg-light sticky-col">Lamp 1: Hora</td>{% for reg in registros %} <td><small class="text-muted">{{ reg['lamp1_hora'] or '-' }}</small></td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Lamp 2: Estado</td>
+                        {% for reg in registros %} 
+                            <td>
+                                {% if reg['lamp2_encendido'] == 'Encendido' %}<span class="badge bg-success">ON</span>
+                                {% else %}<span class="badge bg-secondary">OFF</span>{% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                    <tr><td class="text-start bg-light sticky-col">Lamp 2: Hora</td>{% for reg in registros %} <td><small class="text-muted">{{ reg['lamp2_hora'] or '-' }}</small></td> {% endfor %}</tr>
+
+                    <!-- OBSERVACIONES -->
+                    <tr class="table-warning"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Observaciones</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Nota:</td>
+                        {% for reg in registros %} 
+                            <td style="max-width: 200px; font-size: 0.75rem; white-space: normal; text-align: left;">
+                                {{ reg['observaciones'] or '-' }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.sticky-col { position: sticky; left: 0; border-right: 2px solid #dee2e6 !important; }
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    body { padding: 0 !important; margin: 0 !important; background-color: white !important; }
+    nav, header, footer, .sidebar, .btn, form, a.btn, a { display: none !important; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 10px !important; text-align: center; color: black !important; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 2px solid black !important; }
+    .card { border: none !important; box-shadow: none !important; margin: 0 !important; }
+    .table-responsive { max-height: none !important; overflow: visible !important; }
+    .sticky-col { position: static !important; border-right: none !important; }
+    table { page-break-inside: auto; font-size: 0.70rem !important; width: 100% !important; color: black !important; border-collapse: collapse !important; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+    .table-dark, .table-secondary, .table-light, .bg-light, .bg-dark { background-color: transparent !important; color: #000 !important; }
+    th, td { border: 1px solid #000 !important; padding: 4px !important; }
+    .badge { border: 1px solid #000; color: #000 !important; background-color: transparent !important; }
+    .text-primary, .text-danger, .text-success, .text-warning, .text-info { color: black !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,134 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Calidad (Tanque y Lavado)</h2>
+    
+    <div class="d-flex align-items-center">
+        <!-- Formulario para cambiar la fecha -->
+        <form class="d-flex align-items-center me-3" method="GET" action="{{ url_for('resumen_calidad_lavado') }}">
+            <label for="fecha" class="form-label mb-0 me-2 fw-bold text-muted">Fecha:</label>
+            <input type="date" id="fecha" name="fecha" class="form-control form-control-sm me-2 shadow-sm border-primary" value="{{ fecha_seleccionada }}" onchange="this.form.submit()">
+            <a href="{{ url_for('resumen_calidad_lavado') }}" class="btn btn-outline-secondary btn-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('calidad_lavado_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+{% if registros %}
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <!-- La tabla tiene overflow-x auto para que en móviles se pueda scrollear horizontalmente -->
+            <table class="table table-bordered table-hover align-middle mb-0 text-center" style="font-size: 0.85rem;">
+                <!-- ENCABEZADOS PRINCIPALES -->
+                <thead class="table-dark align-middle">
+                    <tr>
+                        <th rowspan="4" class="bg-primary text-white" style="width: 5%;">Hora</th>
+                        <th rowspan="4" class="bg-primary text-white" style="width: 5%;">Fases de Producción</th>
+                        <th colspan="6" class="bg-success text-white">(5) Producto Final / Tanque</th>
+                        <th colspan="8" class="bg-info text-dark">(6) Lavado de Envases / Maquina Lavadora</th>
+                    </tr>
+                    <tr>
+                        <th rowspan="3">pH<br><small class="fw-normal">(6.8-7.5)</small></th>
+                        <th rowspan="3">S.T.D.<br><small class="fw-normal">(80-90 ppm)</small></th>
+                        <th rowspan="3">Cond.<br><small class="fw-normal">(160-180µS/cm)</small></th>
+                        <th rowspan="3">Dureza<br><small class="fw-normal">(5-10 ppm)</small></th>
+                        <th rowspan="3">Ozono<br><small class="fw-normal">(3-4 gotas)</small></th>
+                        <th rowspan="3">Cloro Res.<br><small class="fw-normal">(0 ppm)</small></th>
+                        
+                        <th colspan="3" class="bg-secondary text-white">Lavado Alcalino</th>
+                        <th colspan="2" class="bg-secondary text-white">Lavado Ácido</th>
+                        <th colspan="3" class="bg-secondary text-white">Enjuague Final</th>
+                    </tr>
+                    <tr>
+                        <th>pH<br><small class="fw-normal">(10-10.5)</small></th>
+                        <th>G3<br><small class="fw-normal">(0.4-0.5%)</small></th>
+                        <th>Temp.<br><small class="fw-normal">(36-38°C)</small></th>
+                        
+                        <th>pH<br><small class="fw-normal">(3-3.5)</small></th>
+                        <th>Acido PL<br><small class="fw-normal">(0.1%)</small></th>
+                        
+                        <th>pH<br><small class="fw-normal">(6.8-7.5)</small></th>
+                        <th>Ozono<br><small class="fw-normal">(6-8 Gotas)</small></th>
+                        <th>Cloro<br><small class="fw-normal">(0 ppm)</small></th>
+                    </tr>
+                </thead>
+
+                <!-- CUERPO DE LA TABLA (DATOS) -->
+                <tbody>
+                    {% for r in registros %}
+                    <tr>
+                        <!-- Datos base -->
+                        <td class="fw-bold bg-light">{{ r['hora_monitoreo'] }}</td>
+                        <td class="fw-bold bg-light text-uppercase">NAVE {{ r['nave'] }}</td>
+                        
+                        <!-- Tanque -->
+                        <td>{{ r['tanque_ph'] or '-' }}</td>
+                        <td>{{ r['tanque_std'] or '-' }}</td>
+                        <td>{{ r['tanque_conductividad'] or '-' }}</td>
+                        <td>{{ r['tanque_dureza'] or '-' }}</td>
+                        <td>{{ r['tanque_ozono'] or '-' }}</td>
+                        <td>{{ r['tanque_cloro'] or '-' }}</td>
+
+                        <!-- Alcalino -->
+                        <td>{{ r['alcalino_ph'] or '-' }}</td>
+                        <td>{{ r['alcalino_g3'] or '-' }}</td>
+                        <td>{{ r['alcalino_temperatura'] or '-' }}</td>
+                        
+                        <!-- Acido -->
+                        <td>{{ r['acido_ph'] or '-' }}</td>
+                        <td>{{ r['acido_pl'] or '-' }}</td>
+
+                        <!-- Enjuague -->
+                        <td>{{ r['enjuague_ph'] or '-' }}</td>
+                        <td>{{ r['enjuague_ozono'] or '-' }}</td>
+                        <td>{{ r['enjuague_cloro'] or '-' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 text-center">
+    <button onclick="window.print()" class="btn btn-lg btn-outline-dark shadow-sm">
+        <i class="bi bi-printer"></i> Imprimir Reporte
+    </button>
+</div>
+
+<!-- Estilos para impresión -->
+<style>
+@media print {
+    body * { visibility: hidden; }
+    .table-responsive, .table-responsive * { visibility: visible; }
+    .table-responsive {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+    .table-dark th {
+        background-color: #343a40 !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+    }
+    .bg-primary { background-color: #0d6efd !important; -webkit-print-color-adjust: exact; }
+    .bg-success { background-color: #198754 !important; -webkit-print-color-adjust: exact; }
+    .bg-info { background-color: #0dcaf0 !important; -webkit-print-color-adjust: exact; }
+    .bg-secondary { background-color: #6c757d !important; -webkit-print-color-adjust: exact; }
+    .btn, form, a, .d-flex.justify-content-between { display: none !important; }
+}
+</style>
+
+{% else %}
+<!-- ALERTA SI NO HAY DATOS -->
+<div class="alert alert-warning text-center mt-4 shadow-sm border-0 rounded-4 py-5" role="alert">
+    <i class="bi bi-exclamation-triangle display-4 text-warning mb-3"></i>
+    <h4>No hay registros para la fecha calculada.</h4>
+    <p>La fecha seleccionada (<strong>{{ fecha_seleccionada }}</strong>) no contiene información en el sistema.</p>
+    <a href="{{ url_for('nuevo_calidad_lavado') }}" class="btn btn-warning mt-3">Registrar Primera Lectura</a>
+</div>
+{% endif %}
+{% endblock %}

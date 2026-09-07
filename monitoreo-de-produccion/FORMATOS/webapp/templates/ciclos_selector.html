@@ -1,0 +1,48 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm border-info">
+            <div class="card-header bg-info text-white text-center">
+                <h4 class="mb-0 fw-bold">Seleccionar Suavizador</h4>
+            </div>
+            <div class="card-body">
+                <p class="text-muted text-center mb-4">Elige el suavizador para iniciar un bloque o continuar su rutina pendiente.</p>
+                <form action="{{ url_for('continuar_ciclo') }}" method="GET">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Planta:</label>
+                        {% if current_user.username == 'PRODPlanta_A' %}
+                            <input type="text" class="form-control bg-light" value="Planta_A" disabled>
+                            <input type="hidden" name="planta" value="Planta_A">
+                        {% elif current_user.username == 'PRODELEC' %}
+                            <input type="text" class="form-control bg-light" value="Planta_B" disabled>
+                            <input type="hidden" name="planta" value="Planta_B">
+                        {% else %}
+                            <select name="planta" class="form-select" required>
+                                <option value="">Selecciona la planta...</option>
+                                <option value="Planta_B">Planta_B</option>
+                                <option value="Planta_A">Planta_A</option>
+                            </select>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-bold">Suavizador en turno:</label>
+                        <select class="form-select form-select-lg" name="numero_suavizador" required>
+                            <option value="">Selecciona...</option>
+                            <option value="1">Suavizador 1</option>
+                            <option value="2">Suavizador 2</option>
+                        </select>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-info text-white btn-lg fw-bold">Continuar Ciclo</button>
+                        <a href="{{ url_for('ciclos_index') }}" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

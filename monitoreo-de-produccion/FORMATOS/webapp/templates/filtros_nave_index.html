@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2>Check List Área de Filtros y Nave</h2>
+    <div>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary me-2">Volver al Menú Principal</a>
+        {% if current_user.role in ['ADMIN', 'SUPER'] %}
+        <a href="{{ url_for('resumen_filtros_nave') }}" class="btn btn-outline-info me-2"><i class="bi bi-table"></i>
+            Resumen Diario</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#exportarExcelModal" class="btn btn-outline-success"><i
+                class="bi bi-file-earmark-excel"></i> Exportar a Excel</a>
+        {% endif %}
+    </div>
+</div>
+<div class="text-end mb-4">
+    <a href="{{ url_for('nuevo_filtros_nave') }}" class="btn btn-success btn-lg">
+        + Nuevo Registro
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Ejecutado por</th>
+                <th>Responsable</th>
+                <th>Creado el</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for reg in registros %}
+            <tr>
+                <td>{{ reg['id'] }}</td>
+                <td><strong>{{ reg['fecha'] }}</strong></td>
+                <td>{{ reg['firma_ejecuta'] }}</td>
+                <td>{{ reg['firma_responsable'] }}</td>
+                <td><small class="text-muted">{{ reg['created_at'] }}</small></td>
+                <td>
+                    <a href="{{ url_for('detalle_filtros_nave', id=reg['id']) }}" class="btn btn-sm btn-outline-info">
+                        Ver Detalle
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" class="text-center text-muted py-4">
+                    Aún no hay registros capturados. ¡Agrega el primero!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de Exportación a Excel -->
+<div class="modal fade" id="exportarExcelModal" tabindex="-1" aria-labelledby="exportarExcelModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title" id="exportarExcelModalLabel"><i class="bi bi-file-earmark-excel"></i> Exportar a
+                    Excel (Filtros y Nave)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+            <form action="{{ url_for('exportar_filtros_nave') }}" method="POST">
+                <div class="modal-body">
+                    <p>Selecciona el rango de fechas para generar el reporte de Check List de Filtros y Nave.</p>
+                    <div class="mb-3">
+                        <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
+                        <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fecha_fin" class="form-label">Fecha de Fin</label>
+                        <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Generar Archivo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,179 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard Secuencias de Ciclos 
+        <small class="fs-6 text-muted fw-normal">{{ fecha_inicio }} al {{ fecha_fin }}</small>
+    </h2>
+    <div class="d-flex align-items-center gap-2">
+        <form class="d-flex align-items-center gap-2" method="GET" action="{{ url_for('dashboard_ciclos') }}">
+            <label class="fw-bold text-muted mb-0">De:</label>
+            <input type="date" name="fecha_inicio" class="form-control border-primary shadow-sm" value="{{ fecha_inicio }}" style="width:150px;">
+            <label class="fw-bold text-muted mb-0">A:</label>
+            <input type="date" name="fecha_fin" class="form-control border-primary shadow-sm" value="{{ fecha_fin }}" style="width:150px;">
+            <button type="submit" class="btn btn-primary shadow-sm">Consultar</button>
+            <a href="{{ url_for('dashboard_ciclos') }}" class="btn btn-outline-secondary shadow-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('ciclos_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<!-- TARJETAS DE INDICADORES (KPIs) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-primary text-white bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Ciclos Completados</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_ciclos }}</h2>
+                <small class="mt-2 text-white-50"><i class="bi bi-check-circle"></i> En el periodo analizado</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-success text-white bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Tiempo Total Promedio</h6>
+                <h2 class="display-5 fw-bold mb-0">{{ kpi_avg_total }} <small class="fs-6">min</small></h2>
+                <small class="mt-2 text-white-50">Suma de todas las fases</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-info text-dark bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Retrolavado Promedio</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_avg_retro }} <small class="fs-6">min</small></h2>
+                <small class="mt-2 text-dark-50">Duración promedio</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-warning text-dark bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Regenerado Promedio</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_avg_regen }} <small class="fs-6">min</small></h2>
+                <small class="mt-2 text-dark-50">Duración promedio</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row g-4 mb-5">
+    
+    <!-- Gráfico 1: Tiempos Totales por Ciclo -->
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-clock-history text-primary"></i> Tiempo Total por Ciclo</h5>
+                <p class="text-muted small">Duración total (minutos) de principio a fin de cada secuencia registrada</p>
+            </div>
+            <div class="card-body" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="totalChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico 2: Desglose por Fases -->
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-bar-chart-steps text-success"></i> Tiempos en cada Fase</h5>
+                <p class="text-muted small">Retrolavado, Regenerado, Enjuagues (Lento/Rápido) en minutos</p>
+            </div>
+            <div class="card-body" style="position: relative; height: 400px; width: 100%;">
+                <canvas id="fasesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Importar Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inyección de variables con JSON Dumps
+    const labels = {{ chart_labels | safe }};
+    const cTotal = {{ chart_total | safe }};
+    const cRetro = {{ chart_retro | safe }};
+    const cRegen = {{ chart_regen | safe }};
+    const cLento = {{ chart_lento | safe }};
+    const cRapido = {{ chart_rapido | safe }};
+
+    // === GRÁFICA 1: Tiempos Totales (Línea) ===
+    const ctxTotal = document.getElementById('totalChart').getContext('2d');
+    new Chart(ctxTotal, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Tiempo Total (Minutos)',
+                    data: cTotal,
+                    borderColor: 'rgba(54, 162, 235, 1)', // Azul Primario
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    pointBackgroundColor: 'rgba(54, 162, 235, 1)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Minutos' }
+                }
+            }
+        }
+    });
+
+    // === GRÁFICA 2: Desglose por Fases (Barras Apiladas) ===
+    const ctxFases = document.getElementById('fasesChart').getContext('2d');
+    new Chart(ctxFases, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Retrolavado',
+                    data: cRetro,
+                    backgroundColor: 'rgba(255, 99, 132, 0.8)', // Rojo claro
+                },
+                {
+                    label: 'Regenerado',
+                    data: cRegen,
+                    backgroundColor: 'rgba(255, 159, 64, 0.8)', // Naranja
+                },
+                {
+                    label: 'Enjuague Lento',
+                    data: cLento,
+                    backgroundColor: 'rgba(75, 192, 192, 0.8)', // Verde agua
+                },
+                {
+                    label: 'Enjuague Rápido',
+                    data: cRapido,
+                    backgroundColor: 'rgba(153, 102, 255, 0.8)', // Morado
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: true },
+                y: { 
+                    stacked: true,
+                    title: { display: true, text: 'Minutos' }
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

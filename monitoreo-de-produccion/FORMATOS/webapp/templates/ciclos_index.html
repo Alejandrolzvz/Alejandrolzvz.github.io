@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2>Bitácora de Secuencias de Ciclos del Suavizador</h2>
+    <div>
+        <a href="{{ url_for('home') }}" class="btn btn-outline-secondary me-2">Volver al Menú Principal</a>
+        {% if current_user.role in ['ADMIN', 'SUPER'] %}
+        <a href="{{ url_for('resumen_ciclos') }}" class="btn btn-outline-info me-2"><i class="bi bi-table"></i>
+            Resumen Diario</a>
+        <a href="{{ url_for('dashboard_ciclos') }}" class="btn btn-outline-primary me-2"><i
+                class="bi bi-speedometer2"></i>
+            Dashboard</a>
+        <a href="#" data-bs-toggle="modal" data-bs-target="#exportarExcelModal" class="btn btn-outline-success"><i
+                class="bi bi-file-earmark-excel"></i> Exportar a Excel</a>
+        {% endif %}
+    </div>
+</div>
+<div class="text-end mb-4">
+    <a href="{{ url_for('continuar_ciclo') }}" class="btn btn-info text-white btn-lg fw-bold">
+        + Iniciar / Continuar Ciclo
+    </a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped">
+        <thead class="table-dark text-center align-middle">
+            <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Planta</th>
+                <th>Suavizador</th>
+                <th>Retro Lavado</th>
+                <th>Regenerado</th>
+                <th>Enjuague Lento</th>
+                <th>Enjuague Rápido</th>
+                <th>Estado</th>
+                <th>Tiempo Total</th>
+                <th>Opciones</th>
+            </tr>
+        </thead>
+        <tbody class="text-center align-middle">
+            {% for reg in registros %}
+            <tr>
+                <td>{{ reg['id'] }}</td>
+                <td>{{ reg['fecha'] }}</td>
+                <td class="fw-bold text-primary">{{ reg['planta'] or 'N/A' }}</td>
+                <td><strong>S{{ reg['numero_suavizador'] }}</strong></td>
+                <td>
+                    <small>
+                        {{ reg['inicio_retrolavado'] or '--:--' }} <br>
+                        {{ reg['fin_retrolavado'] or '--:--' }}
+                    </small>
+                    {% if reg['duracion_retrolavado'] %}<br><span class="text-primary fw-bold"
+                        style="font-size: 0.85rem;">[{{ reg['duracion_retrolavado'] }}]</span>{% endif %}
+                </td>
+                <td>
+                    <small>
+                        {{ reg['inicio_regenerado'] or '--:--' }} <br>
+                        {{ reg['fin_regenerado'] or '--:--' }}
+                    </small>
+                    {% if reg['duracion_regenerado'] %}<br><span class="text-primary fw-bold"
+                        style="font-size: 0.85rem;">[{{ reg['duracion_regenerado'] }}]</span>{% endif %}
+                </td>
+                <td>
+                    <small>
+                        {{ reg['inicio_enjuage_lento'] or '--:--' }} <br>
+                        {{ reg['fin_enjuage_lento'] or '--:--' }}
+                    </small>
+                    {% if reg['duracion_enjuage_lento'] %}<br><span class="text-primary fw-bold"
+                        style="font-size: 0.85rem;">[{{ reg['duracion_enjuage_lento'] }}]</span>{% endif %}
+                </td>
+                <td>
+                    <small>
+                        {{ reg['inicio_enjuage_rapido'] or '--:--' }} <br>
+                        {{ reg['fin_enjuage_rapido'] or '--:--' }}
+                    </small>
+                    {% if reg['duracion_enjuage_rapido'] %}<br><span class="text-primary fw-bold"
+                        style="font-size: 0.85rem;">[{{ reg['duracion_enjuage_rapido'] }}]</span>{% endif %}
+                </td>
+                <td>
+                    {% if reg['estado'] == 'Completado' %}
+                    <span class="badge bg-success">Completado</span>
+                    {% else %}
+                    <span class="badge bg-warning text-dark"><i class="bi bi-clock-history"></i> En progreso</span>
+                    {% endif %}
+                </td>
+                <td class="fw-bold">{{ reg['tiempo_total'] or 'N/A' }}</td>
+                <td>
+                    {% if reg['estado'] == 'Completado' %}
+                    <a href="{{ url_for('detalle_ciclos', id=reg['id']) }}" class="btn btn-sm btn-outline-info">
+                        Ver Detalles
+                    </a>
+                    {% else %}
+                    <a href="{{ url_for('continuar_ciclo', numero_suavizador=reg['numero_suavizador'], planta=reg['planta']) }}"
+                        class="btn btn-sm btn-primary">
+                        Continuar
+                    </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="11" class="text-center text-muted py-4">
+                    Aún no hay ciclos capturados. ¡Agrega el primero!
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de Exportación a Excel -->
+<div class="modal fade" id="exportarExcelModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title"><i class="bi bi-file-earmark-excel"></i> Exportar a Excel</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <form action="{{ url_for('exportar_ciclos') }}" method="POST">
+                <div class="modal-body">
+                    <p>Selecciona el rango de fechas para generar el reporte de Ciclos.</p>
+                    <div class="mb-3">
+                        <label for="fecha_inicio" class="form-label">Fecha de Inicio</label>
+                        <input type="date" class="form-control" name="fecha_inicio" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="fecha_fin" class="form-label">Fecha de Fin</label>
+                        <input type="date" class="form-control" name="fecha_fin" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-success">Generar Archivo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

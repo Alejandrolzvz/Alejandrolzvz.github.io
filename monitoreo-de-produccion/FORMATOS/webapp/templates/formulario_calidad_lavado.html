@@ -1,0 +1,202 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0 fw-bold">Nuevo Registro: Calidad (Tanque y Lavado)</h4>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('nuevo_calidad_lavado') }}" method="POST">
+
+            <!-- DATOS GENERALES -->
+            <div class="row mb-4">
+                <div class="col-md-3 mb-2">
+                    <label class="form-label fw-bold">Fecha</label>
+                    <input type="date" class="form-control" name="fecha" value="{{ hoy }}" required>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label fw-bold">Planta</label>
+                    {% if current_user.username == 'PRODPlanta_A' %}
+                        <input type="text" class="form-control bg-light" value="Planta_A" disabled>
+                        <input type="hidden" name="planta" value="Planta_A">
+                    {% elif current_user.username == 'PRODELEC' %}
+                        <input type="text" class="form-control bg-light" value="Planta_B" disabled>
+                        <input type="hidden" name="planta" value="Planta_B">
+                    {% else %}
+                        <select class="form-select" name="planta" required>
+                            <option value="">Selecciona la planta...</option>
+                            <option value="Planta_B">Planta_B</option>
+                            <option value="Planta_A">Planta_A</option>
+                        </select>
+                    {% endif %}
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label fw-bold">Nave</label>
+                    <select class="form-select" name="nave" required>
+                        <option value="">Selecciona nave...</option>
+                        <option value="Nave 1">Nave 1</option>
+                        <option value="Nave 2">Nave 2</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <label class="form-label fw-bold">Hora de Monitoreo</label>
+                    <select class="form-select" name="hora_monitoreo" required>
+                        <option value="">Selecciona turno...</option>
+                        <option value="6:00 A.M. - 7:00 A.M.">6:00 A.M. - 7:00 A.M.</option>
+                        <option value="8:00 A.M. - 9:00 A.M.">8:00 A.M. - 9:00 A.M.</option>
+                        <option value="10:00 A.M. - 11:00 A.M.">10:00 A.M. - 11:00 A.M.</option>
+                        <option value="12:00 P.M. - 1:00 P.M.">12:00 P.M. - 1:00 P.M.</option>
+                        <option value="2:00 P.M. - 3:00 P.M.">2:00 P.M. - 3:00 P.M.</option>
+                        <option value="4:00 P.M. - 5:00 P.M.">4:00 P.M. - 5:00 P.M.</option>
+                        <option value="6:00 P.M. - 7:00 P.M.">6:00 P.M. - 7:00 P.M.</option>
+                    </select>
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="text-success mb-3">Producto Final / Tanque</h5>
+            <div class="row mb-4">
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">pH</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_ph" placeholder="(6.8-7.5 Unidades)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">S.T.D.</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_std" placeholder="(80-90 ppm)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">Conductividad</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_conductividad" placeholder="(160-180µS/cm)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">Dureza</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_dureza" placeholder="(5-10 ppm)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">Ozono</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_ozono" placeholder="(3-4 gotas)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light fw-bold" style="min-width:160px;">Cloro Residual</span>
+                        <input type="number" step="0.01" class="form-control" name="tanque_cloro" placeholder="(0 ppm)">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <h5 class="text-success mb-3">Lavado de Envases / Máquina Lavadora</h5>
+            
+            <h6 class="fw-bold mt-3">Lavado Alcalino</h6>
+            <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">pH</span>
+                        <input type="number" step="0.01" class="form-control" name="alcalino_ph" placeholder="(10-10.5 Unidades)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Concentración G3</span>
+                        <input type="number" step="0.01" class="form-control" name="alcalino_g3" placeholder="(0.4-0.5%)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Temperatura</span>
+                        <input type="number" step="0.01" class="form-control" name="alcalino_temperatura" placeholder="(36-38°C)">
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mt-3">Lavado Ácido</h6>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">pH</span>
+                        <input type="number" step="0.01" class="form-control" name="acido_ph" placeholder="(3-3.5 Unidades)">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Concentración Ácido PL</span>
+                        <input type="number" step="0.01" class="form-control" name="acido_pl" placeholder="(0.1%)">
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mt-3">Enjuague Final (Tanque)</h6>
+            <div class="row mb-3">
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">pH</span>
+                        <input type="number" step="0.01" class="form-control" name="enjuague_ph" placeholder="(6.8-7.5 Unidades)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Ozono</span>
+                        <input type="number" step="0.01" class="form-control" name="enjuague_ozono" placeholder="(6-8 Gotas)">
+                    </div>
+                </div>
+                <div class="col-md-4 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Cloro residual</span>
+                        <input type="number" step="0.01" class="form-control" name="enjuague_cloro" placeholder="(0 ppm)">
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mt-3">Filtro de Carbón</h6>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:200px;">Cloro residual inicial</span>
+                        <input type="number" step="0.01" class="form-control" name="carbon_cloro_inicial" placeholder="(0)">
+                    </div>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:200px;">Cloro residual PT</span>
+                        <input type="number" step="0.01" class="form-control" name="carbon_cloro_pt" placeholder="(0)">
+                    </div>
+                </div>
+            </div>
+
+            <h6 class="fw-bold mt-3">Desinfección de Tapas</h6>
+            <div class="row mb-3">
+                <div class="col-md-6 mb-2">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light" style="min-width:160px;">Cloro</span>
+                        <input type="number" step="0.01" class="form-control" name="tapas_cloro" placeholder="(0.5 ppm)">
+                    </div>
+                </div>
+            </div>
+
+            <hr>
+            <div class="mb-3">
+                <label class="form-label fw-bold">Observaciones</label>
+                <textarea class="form-control" name="observaciones" rows="3" placeholder="Observaciones adicionales..."></textarea>
+            </div>
+
+            <div class="text-end mt-4">
+                <a href="{{ url_for('calidad_lavado_index') }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-success fw-bold">
+                    <i class="bi bi-save"></i> Guardar Registro
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

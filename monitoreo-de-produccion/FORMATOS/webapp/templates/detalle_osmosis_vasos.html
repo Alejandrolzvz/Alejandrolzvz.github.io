@@ -1,0 +1,176 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalles del Registro Vasos #{{ registro['id'] }}</h2>
+    <a href="{{ url_for('osmosis_vasos_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+        Resumen de Captura
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-3"><strong>Planta:</strong> <span class="badge bg-secondary">{{ registro['planta'] }}</span></div>
+            <div class="col-md-3"><strong>Fecha Lectura:</strong> {{ registro['fecha'] }}</div>
+            <div class="col-md-3"><strong>Turno:</strong> {{ registro['turno'] }}</div>
+            <div class="col-md-3"><strong>Hora Guardado:</strong> <small class="text-muted">{{ registro['created_at'] }}</small></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm border-primary">
+    <div class="card-header bg-white fw-bold text-primary">S.T.D., Eficiencia y Rango por Vaso</div>
+    <div class="card-body">
+        <div class="row text-center mb-3 g-2">
+            <div class="col-md-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 1</small>
+                    <hr class="my-1">
+                    <div><small>S.T.D.:</small> <strong>{{ registro['sdt_vaso1'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_vaso1'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_vaso1'] or '-' }}</strong></div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 2</small>
+                    <hr class="my-1">
+                    <div><small>S.T.D.:</small> <strong>{{ registro['sdt_vaso2'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_vaso2'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_vaso2'] or '-' }}</strong></div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 3</small>
+                    <hr class="my-1">
+                    <div><small>S.T.D.:</small> <strong>{{ registro['sdt_vaso3'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_vaso3'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_vaso3'] or '-' }}</strong></div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 4</small>
+                    <hr class="my-1">
+                    <div><small>S.T.D.:</small> <strong>{{ registro['sdt_vaso4'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_vaso4'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_vaso4'] or '-' }}</strong></div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 5</small>
+                    <hr class="my-1">
+                    <div><small>S.T.D.:</small> <strong>{{ registro['sdt_vaso5'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_vaso5'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_vaso5'] or '-' }}</strong></div>
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="p-2 bg-info border rounded text-white shadow-sm">
+                    <small class="d-block">S.T.D. Final</small>
+                    <hr class="my-1 bg-white">
+                    <div><small>S.T.D.:</small> <strong class="fs-5">{{ registro['sdt_final'] or '-' }}</strong></div>
+                    <div><small>Efic.:</small> <strong>{{ registro['efi_final'] or '-' }}</strong></div>
+                    <div><small>Rango:</small> <strong>{{ registro['rango_final'] or '-' }}</strong></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold">Detalles de Rechazos y Entrada</div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6 border-end">
+                <ul class="list-group list-group-flush shadow-sm">
+                    <li class="list-group-item bg-light fw-bold text-primary">Rechazos (S.T.D.)</li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Rechazo 1 y 2:</span> <strong>{{ registro['sdt_rechazo12'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Rechazo 3:</span> <strong>{{ registro['sdt_rechazo3'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Rechazo 4:</span> <strong>{{ registro['sdt_rechazo4'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Rechazo 5:</span> <strong>{{ registro['sdt_rechazo5'] or '-' }}</strong></li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <ul class="list-group list-group-flush shadow-sm">
+                    <li class="list-group-item bg-light fw-bold text-primary">Entrada</li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Entrada S.T.D:</span> <strong>{{ registro['entrada_sdt'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Entrada D.T:</span> <strong>{{ registro['entrada_dt'] or '-' }}</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-5 shadow-sm">
+    <div class="card-header bg-warning text-dark fw-bold border-warning">
+        Observaciones y Firmas
+    </div>
+    <div class="card-body">
+        <div class="mb-4">
+            <h6 class="fw-bold">Observaciones:</h6>
+            {% if registro['observaciones'] %}
+                <p class="mb-0 bg-light p-3 border rounded">{{ registro['observaciones'] }}</p>
+            {% else %}
+                <p class="text-muted fst-italic mb-0">No se registraron observaciones.</p>
+            {% endif %}
+        </div>
+        <hr>
+        <div class="row">
+            <div class="col-md-3 text-center">
+                <div class="border-bottom border-dark mb-2 py-3">{{ registro['firma_jefe_turno_1'] or '' }}</div>
+                <small class="text-muted">OPERADOR EN TURNO T. BLANCA</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="border-bottom border-dark mb-2 py-3">{{ registro['firma_jefe_turno_2'] or '' }}</div>
+                <small class="text-muted">JEFE DE SERVICIOS</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="border-bottom border-dark mb-2 py-3">{{ registro['firma_subjefe_calidad'] or '' }}</div>
+                <small class="text-muted">INSPECTOR EN TURNO C. DE C.</small>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="border-bottom border-dark mb-2 py-3">{{ registro['firma_jefe_calidad'] or '' }}</div>
+                <small class="text-muted">COORDINADOR DE ASEGURAMIENTO DE CALIDAD</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Botón final para imprimir o regresar -->
+<div class="mb-5 d-flex justify-content-end">
+    <a href="{{ url_for('osmosis_vasos_index') }}" class="btn btn-secondary me-2">Regresar</a>
+    <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+</div>
+
+<style>
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 5px !important; text-align: center; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 1px solid black !important; }
+    body { padding: 0 !important; margin: 0 !important; }
+
+    .btn, .badge {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+    }
+    .bg-light, .bg-dark, .bg-warning, .bg-info {
+        background-color: transparent !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+    }
+}
+</style>
+{% endblock %}

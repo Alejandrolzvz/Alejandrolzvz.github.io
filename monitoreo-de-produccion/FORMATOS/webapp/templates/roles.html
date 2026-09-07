@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="bi bi-shield-lock-fill me-2"></i>Gestión de Roles</h2>
+        <p class="text-muted">Administra los niveles de acceso y permisos del sistema.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('nuevo_rol') }}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i> Nuevo Rol
+        </a>
+        <a href="{{ url_for('lista_usuarios') }}" class="btn btn-outline-secondary ms-2">
+            <i class="bi bi-people me-1"></i> Usuarios
+        </a>
+    </div>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-hover align-middle">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 80px;">ID</th>
+                <th>Nombre del Rol</th>
+                <th>Descripción</th>
+                <th class="text-end" style="width: 200px;">Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for rol in roles %}
+            <tr>
+                <td><span class="badge bg-secondary">{{ rol.id }}</span></td>
+                <td>
+                    <strong class="text-primary">{{ rol.name }}</strong>
+                    {% if rol.id <= 2 %}
+                    <span class="badge bg-info text-dark ms-2" style="font-size: 0.7rem;">SISTEMA</span>
+                    {% endif %}
+                </td>
+                <td>{{ rol.description or 'Sin descripción' }}</td>
+                <td class="text-end">
+                    <a href="{{ url_for('editar_rol', id=rol.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                        <i class="bi bi-pencil"></i>
+                    </a>
+                    {% if rol.id > 2 %}
+                    <form action="{{ url_for('eliminar_rol', id=rol.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de eliminar este rol? Se verificará si hay usuarios asignados.')">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </form>
+                    {% else %}
+                    <button class="btn btn-sm btn-outline-secondary" disabled title="Rol de sistema protegido">
+                        <i class="bi bi-trash"></i>
+                    </button>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

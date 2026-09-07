@@ -1,0 +1,181 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalle Registro #{{ registro['id'] }} (Cisternas y Garrafón)</h2>
+    <a href="{{ url_for('calidad_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<!-- DATOS GENERALES -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold">
+        Datos de Identificación
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3 mb-2"><strong>Fecha:</strong><br>{{ registro['fecha'] }}</div>
+            <div class="col-md-3 mb-2"><strong>Planta:</strong><br>{{ registro['planta'] or '-' }}</div>
+            <div class="col-md-3 mb-2"><strong>Nave:</strong><br>{{ registro['nave'] or '-' }}</div>
+            <div class="col-md-3 mb-2"><strong>Hora Monitoreo:</strong><br>{{ registro['hora_monitoreo'] }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- RED DE DISTRIBUCIÓN -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Calidad en Red de Distribución
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">C1 - Cloro</h6>
+                    <h4 class="fw-bold">{{ registro['c1_cloro'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">C1 - pH</h6>
+                    <h4 class="fw-bold">{{ registro['c1_ph'] or '-' }}</h4>
+                    <small>Unidades</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">C2 - Cloro</h6>
+                    <h4 class="fw-bold">{{ registro['c2_cloro'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">C2 - pH</h6>
+                    <h4 class="fw-bold">{{ registro['c2_ph'] or '-' }}</h4>
+                    <small>Unidades</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Aduana - Cloro</h6>
+                    <h4 class="fw-bold">{{ registro['aduana_cloro'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PUNTO FINAL -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Punto Final (Agua Purificada)
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">pH</h6>
+                    <h4 class="fw-bold">{{ registro['pf_ph'] or '-' }}</h4>
+                    <small>Unidades</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">S.T.D.</h6>
+                    <h4 class="fw-bold">{{ registro['pf_std'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Conductividad</h6>
+                    <h4 class="fw-bold">{{ registro['pf_conductividad'] or '-' }}</h4>
+                    <small>µS/cm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Dureza</h6>
+                    <h4 class="fw-bold">{{ registro['pf_dureza'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Ozono</h6>
+                    <h4 class="fw-bold">{{ registro['pf_ozono'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+            <div class="col-md-2 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Cloro</h6>
+                    <h4 class="fw-bold text-success">{{ registro['pf_cloro'] or '-' }}</h4>
+                    <small>ppm</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- LÁMPARAS UV -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Lámparas UV
+    </div>
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Lámpara 1 - Estado</h6>
+                    <h4 class="fw-bold {% if registro['lamp1_encendido'] == 'Si' %}text-success{% else %}text-danger{% endif %}">
+                        {{ registro['lamp1_encendido'] or '-' }}
+                    </h4>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Lámpara 1 - Hora cambio</h6>
+                    <h4 class="fw-bold">{{ registro['lamp1_hora'] or '-' }}</h4>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Lámpara 2 - Estado</h6>
+                    <h4 class="fw-bold {% if registro['lamp2_encendido'] == 'Si' %}text-success{% else %}text-danger{% endif %}">
+                        {{ registro['lamp2_encendido'] or '-' }}
+                    </h4>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="p-3 border rounded bg-light">
+                    <h6 class="text-muted mb-1">Lámpara 2 - Hora cambio</h6>
+                    <h4 class="fw-bold">{{ registro['lamp2_hora'] or '-' }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- OBSERVACIONES -->
+{% if registro['observaciones'] %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-secondary text-white fw-bold">Observaciones</div>
+    <div class="card-body">
+        <p class="mb-0">{{ registro['observaciones'] }}</p>
+    </div>
+    <div class="card-footer text-muted text-end" style="font-size: 0.85rem;">
+        Registrado el: {{ registro['created_at'] }}
+    </div>
+</div>
+{% else %}
+<div class="card-footer text-muted text-end" style="font-size: 0.85rem;">
+    Registrado el: {{ registro['created_at'] }}
+</div>
+{% endif %}
+
+{% endblock %}

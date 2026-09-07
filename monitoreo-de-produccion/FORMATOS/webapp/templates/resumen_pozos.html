@@ -1,0 +1,88 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Calidad de Pozos</h2>
+    
+    <div class="d-flex align-items-center">
+        <!-- Formulario para cambiar la fecha -->
+        <form class="d-flex align-items-center me-3" method="GET" action="{{ url_for('resumen_pozos') }}">
+            <label for="fecha_q" class="me-2 fw-bold">Fecha:</label>
+            <input type="date" id="fecha_q" name="fecha" class="form-control me-2" value="{{ fecha_seleccionada }}" onchange="this.form.submit()">
+            
+            <label for="planta_q" class="me-2 fw-bold ms-2">Planta:</label>
+            <select id="planta_q" name="planta" class="form-select me-2" onchange="this.form.submit()">
+                <option value="">Todas</option>
+                <option value="Planta_B" {% if planta_seleccionada == 'Planta_B' %}selected{% endif %}>Planta_B</option>
+                <option value="Planta_A" {% if planta_seleccionada == 'Planta_A' %}selected{% endif %}>Planta_A</option>
+            </select>
+            
+            <a href="{{ url_for('resumen_pozos') }}" class="btn btn-outline-secondary btn-sm" title="Ir a hoy">Restablecer</a>
+        </form>
+        <a href="{{ url_for('pozos_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Reporte Consolidado: {{ fecha_seleccionada }}</span>
+        <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive m-0 border-0" style="max-height: 700px; overflow-y: auto;">
+            <table class="table table-bordered table-striped table-hover align-middle mb-0 text-center" style="min-width: 800px; font-size: 0.85rem;">
+                <thead class="table-secondary sticky-top">
+                    <tr>
+                        <th class="bg-light sticky-col" style="z-index: 10;">Hora del Monitoreo</th>
+                        <th>Planta</th>
+                        <th>Pozo</th>
+                        <th>Conductividad</th>
+                        <th>S.T.D.</th>
+                        <th>pH</th>
+                        <th>Cloro</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for reg in registros %}
+                    <tr>
+                        <td class="bg-light sticky-col fw-bold">{{ reg['hora_monitoreo'] }}</td>
+                        <td>{{ reg['planta'] or 'Planta_B' }}</td>
+                        <td><strong>Pozo {{ reg['pozo'] }}</strong></td>
+                        <td>{{ reg['conductividad'] or '-' }}</td>
+                        <td>{{ reg['std'] or '-' }}</td>
+                        <td><strong>{{ reg['ph'] or '-' }}</strong></td>
+                        <td class="text-primary">{{ reg['cloro'] or '-' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="7" class="text-muted py-3">No hay registros para la fecha seleccionada.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.sticky-col { position: sticky; left: 0; border-right: 2px solid #dee2e6 !important; }
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    body { padding: 0 !important; margin: 0 !important; background-color: white !important; }
+    nav, header, footer, .sidebar, .btn, form, a.btn, a { display: none !important; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 10px !important; text-align: center; color: black !important; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 2px solid black !important; }
+    .card { border: none !important; box-shadow: none !important; margin: 0 !important; }
+    .table-responsive { max-height: none !important; overflow: visible !important; }
+    .sticky-col { position: static !important; border-right: none !important; }
+    table { page-break-inside: auto; font-size: 0.70rem !important; width: 100% !important; color: black !important; border-collapse: collapse !important; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+    .table-dark, .table-secondary, .table-light, .bg-light, .bg-dark { background-color: transparent !important; color: #000 !important; }
+    th, td { border: 1px solid #000 !important; padding: 4px !important; }
+    .badge { border: 1px solid #000; color: #000 !important; background-color: transparent !important; }
+    .text-primary, .text-danger, .text-success, .text-warning, .text-info { color: black !important; }
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard de Ventas - PostgreSQL Live</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js & DataLabels -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+
+        .tab-btn.active {
+            border-bottom: 3px solid #2563eb;
+            color: #1d4ed8;
+            font-weight: 600;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid #e2e8f0;
+        }
+
+        .badge-hogar {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .badge-pdv {
+            background-color: #fef3c7;
+            color: #b45309;
+            border: 1px solid #fde68a;
+        }
+
+        .badge-dfs {
+            background-color: #f3e8ff;
+            color: #6b21a8;
+            border: 1px solid #e9d5ff;
+        }
+
+        .badge-emp {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #bbf7d0;
+        }
+
+        .kpi-active {
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.4), 0 2px 4px -1px rgba(37, 99, 235, 0.2) !important;
+            border-color: #3b82f6 !important;
+            transform: scale(1.03);
+            background-color: #f0f9ff;
+        }
+    </style>
+</head>
+
+<body class="text-slate-800 min-h-screen flex flex-col">
+    <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="bg-blue-600 p-2 rounded-lg text-white shadow-md">
+                        <i class="fa-solid fa-database text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight flex items-center gap-2">
+                            Análisis de Ventas
+                            <i id="lock-icon"
+                                class="fa-solid fa-lock text-slate-400 hover:text-white cursor-pointer text-sm transition-colors"
+                                onclick="toggleTargets()" title="Mostrar/Ocultar Metas"></i>
+                        </h1>
+                        <p class="text-xs text-slate-400">Tabla: <code
+                                class="bg-slate-800 px-1 rounded text-cyan-400">staging_recorridos</code></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3">
+                    <span id="sql-status-badge"
+                        class="bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full border border-amber-500/30 font-medium flex items-center gap-1.5"
+                        title="Estado de la conexión">
+                        <i class="fa-solid fa-spinner fa-spin"></i> Conectando...
+                    </span>
+
+                    <button onclick="fetchDataFromAPI()" id="btn-refresh"
+                        class="bg-blue-600 hover:bg-blue-500 text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow">
+                        <i class="fa-solid fa-rotate mr-1"></i> Refrescar
+                    </button>
+
+                    <button id="btn-export-html" onclick="exportStaticHTML()"
+                        class="bg-purple-600 hover:bg-purple-500 text-white text-xs px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition shadow">
+                        <i class="fa-solid fa-file-code mr-1"></i> Exportar Snapshot
+                    </button>
+
+                    <button onclick="exportDataCSV()"
+                        class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs px-3 py-1.5 rounded-lg border border-slate-700 flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-file-csv text-emerald-400"></i> Exportar CSV
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-800 border-t border-slate-700 px-4 sm:px-6 lg:px-8">
+            <div class="max-w-7xl mx-auto flex space-x-6 overflow-x-auto text-sm text-slate-400">
+                <button onclick="switchTab('dashboard')" id="tab-dashboard"
+                    class="tab-btn py-3 px-1 flex items-center gap-2 active"><i class="fa-solid fa-border-all"></i>
+                    Dashboard General</button>
+                <button onclick="switchTab('horarios')" id="tab-horarios"
+                    class="tab-btn py-3 px-1 flex items-center gap-2"><i class="fa-solid fa-clock"></i> Análisis
+                    Horario</button>
+                <button onclick="switchTab('dias')" id="tab-dias" class="tab-btn py-3 px-1 flex items-center gap-2"><i
+                        class="fa-solid fa-calendar-days"></i> Desglose por Día</button>
+                <button onclick="switchTab('meses')" id="tab-meses" class="tab-btn py-3 px-1 flex items-center gap-2"><i
+                        class="fa-solid fa-chart-area"></i> Histórico Mensual</button>
+                <button onclick="switchTab('rutas')" id="tab-rutas" class="tab-btn py-3 px-1 flex items-center gap-2"><i
+                        class="fa-solid fa-ranking-star"></i> Ranking</button>
+                <button onclick="switchTab('embudo')" id="tab-embudo"
+                    class="tab-btn py-3 px-1 flex items-center gap-2 text-emerald-400 hover:text-emerald-300"><i
+                        class="fa-solid fa-filter"></i> Embudo</button>
+                <button onclick="switchTab('agregar')" id="tab-agregar"
+                    class="tab-btn py-3 px-1 flex items-center gap-2 text-amber-400 hover:text-amber-300"><i
+                        class="fa-solid fa-plus-circle"></i> Notas</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+
+        <section class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-9 gap-3 items-end">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-building text-purple-600 mr-1"></i> UDN</label>
+                    <select id="filter-udn" onchange="onUdnChange()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="ALL">Todas las UDNs</option>
+                        <option value="ELEC">UDN 1</option>
+                        <option value="ACIA">UDN 2</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-filter text-blue-600 mr-1"></i> Segmento</label>
+                    <select id="filter-category" onchange="onCategoryChange()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="ALL">Todas</option>
+                        <option value="HOGAR">Sector Residencial</option>
+                        <option value="DFS_CO">Comercial</option>
+                        <option value="PDV_MA">Mayorista</option>
+                        <option value="EMP">Empresarial</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-chart-line text-cyan-600 mr-1"></i> Analizar Por</label>
+                    <select id="filter-metric" onchange="applyFilters()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="vta">Venta Total ($)</option>
+                        <option value="producto_x">Producto X (Unds)</option>
+                        <option value="producto_y">Producto Y (Unds)</option>
+                        <option value="otros">Otros Ingresos ($)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-trophy text-amber-500 mr-1"></i> Ranking</label>
+                    <select id="filter-ranking" onchange="applyFilters()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="ALL_CAT">Todas las Entidades</option>
+                        <option value="TOP3">Top 3</option>
+                        <option value="TOP5">Top 5</option>
+                        <option value="BOTTOM2">Peores 2</option>
+                        <option value="BOTTOM3">Peores 3</option>
+                        <option value="TOP3BOT2">Extremos (Top3/Bot2)</option>
+                        <option value="SPECIFIC">Específica...</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-route text-emerald-600 mr-1"></i> Entidad</label>
+                    <select id="filter-route" onchange="applyFilters()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                        disabled>
+                        <option value="all_selected">-- Seleccionar --</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-calendar-day text-rose-500 mr-1"></i> Desde</label>
+                    <input type="date" id="filter-start-date" onchange="onDateChange()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-calendar-check text-rose-500 mr-1"></i> Hasta</label>
+                    <input type="date" id="filter-end-date" onchange="onDateChange()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs font-medium focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-clock text-indigo-600 mr-1"></i> Horario</label>
+                    <select id="filter-time" onchange="applyFilters()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="all">24 hrs</option>
+                        <option value="before8">Madrugada (< 08:00)</option>
+                        <option value="regular">Turno Regular (08:00 - 16:00)</option>
+                        <option value="after16">Tarde (> 16:00)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1"><i
+                            class="fa-solid fa-calendar text-slate-600 mr-1"></i> Día</label>
+                    <select id="filter-day" onchange="applyFilters()"
+                        class="w-full bg-slate-50 border border-slate-300 rounded-xl px-2.5 py-1.5 text-xs focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                        <option value="all">Todos</option>
+                        <option value="Lunes">Lunes</option>
+                        <option value="Martes">Martes</option>
+                        <option value="Miércoles">Miércoles</option>
+                        <option value="Jueves">Jueves</option>
+                        <option value="Viernes">Viernes</option>
+                        <option value="Sábado">Sábado</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-slate-200 text-xs text-slate-600 flex flex-wrap items-center gap-2">
+                <span class="font-bold text-slate-700"><i class="fa-solid fa-sliders mr-1 text-blue-600"></i> Scope
+                    Activo:</span>
+                <span id="badge-udn-filter"
+                    class="bg-purple-100 text-purple-800 px-2 py-0.5 rounded-full font-medium">Todas</span>
+                <span id="badge-cat-filter"
+                    class="bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">Todas</span>
+                <span id="badge-metric-filter"
+                    class="bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full font-medium">Venta Total</span>
+                <span id="badge-date-filter"
+                    class="bg-rose-100 text-rose-800 px-2 py-0.5 rounded-full font-medium">--</span>
+                <span id="badge-time-filter"
+                    class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded-full font-medium">24 hrs</span>
+                <span id="badge-day-filter"
+                    class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-medium">Todos</span>
+                <button onclick="resetFilters()" id="btn-reset-filters"
+                    class="ml-auto text-xs text-rose-600 hover:text-rose-800 font-semibold underline">
+                    Restablecer
+                </button>
+            </div>
+        </section>
+
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div id="card-kpi-vta"
+                class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition-all duration-300">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Total Ingresos</p>
+                    <h3 id="kpi-vta-total" class="text-xl font-extrabold text-slate-900 mt-1">$0.00</h3>
+                    <span class="text-xs text-emerald-600 font-medium">Filtrado activo</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-lg"><i
+                        class="fa-solid fa-money-bill-wave"></i></div>
+            </div>
+
+            <div id="card-kpi-producto_x"
+                class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition-all duration-300">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Producto X</p>
+                    <h3 id="kpi-producto_x" class="text-xl font-extrabold text-slate-900 mt-1">0</h3>
+                    <span class="text-xs text-slate-500">Unidades</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center text-lg"><i
+                        class="fa-solid fa-box"></i></div>
+            </div>
+
+            <div id="card-kpi-producto_y"
+                class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition-all duration-300">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Producto Y</p>
+                    <h3 id="kpi-producto_y" class="text-xl font-extrabold text-slate-900 mt-1">0</h3>
+                    <span class="text-xs text-slate-500">Unidades</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-layer-group"></i></div>
+            </div>
+
+            <div id="card-kpi-clientes"
+                class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition-all duration-300">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Conversiones</p>
+                    <h3 id="kpi-clientes" class="text-xl font-extrabold text-slate-900 mt-1">0</h3>
+                    <span class="text-xs text-slate-500">Trx Efectivas</span>
+                </div>
+                <div
+                    class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                    <i class="fa-solid fa-users"></i></div>
+            </div>
+
+            <div id="card-kpi-ticket"
+                class="glass-card rounded-2xl p-4 shadow-sm border border-slate-200 flex items-center justify-between transition-all duration-300">
+                <div>
+                    <p class="text-xs font-semibold text-slate-400 uppercase">Ticket Medio</p>
+                    <h3 id="kpi-ticket" class="text-xl font-extrabold text-slate-900 mt-1">$0.00</h3>
+                    <span class="text-xs text-slate-500">Ingreso x Trx</span>
+                </div>
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-lg"><i
+                        class="fa-solid fa-receipt"></i></div>
+            </div>
+        </section>
+
+        <div id="view-dashboard" class="space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2"><i
+                                class="fa-solid fa-chart-column text-blue-600"></i> Rendimiento por Entidad</h3>
+                        <span id="chart-routes-count" class="text-xs text-slate-400">Mostrando Selección</span>
+                    </div>
+                    <div class="relative h-64"><canvas id="chart-ventas-rutas"></canvas></div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="font-bold text-slate-800 text-base flex items-center gap-2"><i
+                                class="fa-solid fa-pie-chart text-purple-600"></i> Distribución Horaria</h3>
+                    </div>
+                    <div class="relative h-64 flex items-center justify-center"><canvas id="chart-horarios"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2"><i
+                            class="fa-solid fa-table-list text-slate-600"></i> Matriz de Desempeño</h3>
+                    <span id="routes-table-counter"
+                        class="text-xs bg-slate-100 text-slate-600 px-3 py-1 rounded-full font-semibold">0</span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                <th class="p-3">Entidad</th>
+                                <th class="p-3">Segmento</th>
+                                <th class="p-3">Ingresos ($)</th>
+                                <th class="p-3">Producto X</th>
+                                <th class="p-3">Producto Y</th>
+                                <th class="p-3">Otros ($)</th>
+                                <th class="p-3">Trx</th>
+                                <th class="p-3">Ticket Prom.</th>
+                                <th class="p-3 target-col hidden">Objetivo ($)</th>
+                                <th class="p-3 target-col hidden">Cumplimiento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-general" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-horarios" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-amber-200 bg-amber-50/30">
+                    <div class="flex items-center justify-between mb-3">
+                        <span
+                            class="text-xs font-bold text-amber-700 uppercase tracking-wide flex items-center gap-1.5"><i
+                                class="fa-solid fa-sun text-amber-500"></i> Turno Madrugada</span>
+                        <span class="text-xs bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full font-semibold">
+                            < 08:00 AM</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-baseline"><span
+                                class="text-sm text-slate-600">Ingresos:</span><span id="horario-mat-vta"
+                                class="font-extrabold text-lg text-slate-900">$0.00</span></div>
+                        <div class="flex justify-between items-baseline"><span class="text-sm text-slate-600">Producto X
+                                (Unds):</span><span id="horario-mat-pzas" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline"><span class="text-sm text-slate-600">Trx
+                                Efectivas:</span><span id="horario-mat-cli" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline"><span
+                                class="text-sm text-slate-600">Ticket:</span><span id="horario-mat-ticket"
+                                class="font-bold text-emerald-600">$0.00</span></div>
+                    </div>
+                </div>
+
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-indigo-200 bg-indigo-50/30">
+                    <div class="flex items-center justify-between mb-3">
+                        <span
+                            class="text-xs font-bold text-indigo-700 uppercase tracking-wide flex items-center gap-1.5"><i
+                                class="fa-solid fa-moon text-indigo-500"></i> Turno Tarde</span>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 px-2.5 py-0.5 rounded-full font-semibold">>
+                            16:00 PM</span>
+                    </div>
+                    <div class="space-y-2">
+                        <div class="flex justify-between items-baseline"><span
+                                class="text-sm text-slate-600">Ingresos:</span><span id="horario-vesp-vta"
+                                class="font-extrabold text-lg text-slate-900">$0.00</span></div>
+                        <div class="flex justify-between items-baseline"><span class="text-sm text-slate-600">Producto X
+                                (Unds):</span><span id="horario-vesp-pzas" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline"><span class="text-sm text-slate-600">Trx
+                                Efectivas:</span><span id="horario-vesp-cli" class="font-bold text-slate-800">0</span>
+                        </div>
+                        <div class="flex justify-between items-baseline"><span
+                                class="text-sm text-slate-600">Ticket:</span><span id="horario-vesp-ticket"
+                                class="font-bold text-emerald-600">$0.00</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-base mb-4">Métrica Horaria Distribuida</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                <th class="p-3">Entidad</th>
+                                <th class="p-3">Segmento</th>
+                                <th class="p-3">
+                                    < 08:00 AM</th>
+                                <th class="p-3">%</th>
+                                <th class="p-3">> 16:00 PM</th>
+                                <th class="p-3">%</th>
+                                <th class="p-3">Regular</th>
+                                <th class="p-3">%</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-horarios" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-dias" class="space-y-6 hidden">
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2"><i
+                            class="fa-solid fa-calendar-week text-emerald-600"></i> Tendencia Semanal</h3>
+                </div>
+                <div class="relative h-64"><canvas id="chart-dias"></canvas></div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-base mb-4">Matriz Semanal</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                <th class="p-3">Entidad</th>
+                                <th class="p-3">Segmento</th>
+                                <th class="p-3">Lunes</th>
+                                <th class="p-3">Martes</th>
+                                <th class="p-3">Miércoles</th>
+                                <th class="p-3">Jueves</th>
+                                <th class="p-3">Viernes</th>
+                                <th class="p-3">Sábado</th>
+                                <th class="p-3">Acumulado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-dias" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-meses" class="space-y-6 hidden">
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-slate-800 text-base flex items-center gap-2"><i
+                            class="fa-solid fa-chart-area text-purple-600"></i> Curva Mensual</h3>
+                </div>
+                <div class="relative h-64"><canvas id="chart-meses"></canvas></div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-base mb-4">Matriz Mensual</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr id="thead-tr-meses"
+                                class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200"></tr>
+                        </thead>
+                        <tbody id="tbody-meses" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-rutas" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-emerald-200 bg-emerald-50/20">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-emerald-800 text-base flex items-center gap-2"><i
+                                class="fa-solid fa-trophy text-amber-500"></i> Top Perfil</h3>
+                        <span id="top-category-badge"
+                            class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800"></span>
+                    </div>
+                    <div id="top-list-cards" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-rose-200 bg-rose-50/20">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="font-bold text-rose-800 text-base flex items-center gap-2"><i
+                                class="fa-solid fa-triangle-exclamation text-rose-500"></i> Bottom Perfil</h3>
+                        <span id="bottom-category-badge"
+                            class="text-xs font-semibold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800"></span>
+                    </div>
+                    <div id="bottom-list-cards" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-embudo" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200 flex flex-col justify-center">
+                    <h3 class="font-bold text-slate-800 text-base mb-4 flex items-center gap-2"><i
+                            class="fa-solid fa-bullseye text-indigo-500"></i> Rendimiento Funnel</h3>
+                    <div class="space-y-4">
+                        <div
+                            class="bg-slate-100 rounded-xl p-4 flex justify-between items-center border-l-4 border-slate-400">
+                            <span class="text-sm font-semibold text-slate-600">1. Oportunidades</span><span
+                                id="embudo-prog" class="text-xl font-black text-slate-800">0</span>
+                        </div>
+                        <div
+                            class="bg-blue-50 rounded-xl p-4 flex justify-between items-center border-l-4 border-blue-500">
+                            <div><span class="text-sm font-semibold text-blue-800 block">2. Contactos</span><span
+                                    id="embudo-pct-vis" class="text-xs text-blue-600 font-bold">0% efectividad</span>
+                            </div>
+                            <span id="embudo-vis" class="text-xl font-black text-blue-700">0</span>
+                        </div>
+                        <div
+                            class="bg-emerald-50 rounded-xl p-4 flex justify-between items-center border-l-4 border-emerald-500">
+                            <div><span class="text-sm font-semibold text-emerald-800 block">3. Conversión
+                                    Real</span><span id="embudo-pct-comp" class="text-xs text-emerald-600 font-bold">0%
+                                    cierre</span></div>
+                            <span id="embudo-comp" class="text-xl font-black text-emerald-700">0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:col-span-2 glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-base mb-4">Pipeline de Conversión</h3>
+                    <div class="relative h-64"><canvas id="chart-embudo"></canvas></div>
+                </div>
+            </div>
+            <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-base mb-4">Desglose de Efectividad</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-600 text-xs uppercase border-b border-slate-200">
+                                <th class="p-3">Entidad</th>
+                                <th class="p-3 text-center">Oportunidades</th>
+                                <th class="p-3 text-center">Contactados</th>
+                                <th class="p-3 text-center">Hit Rate</th>
+                                <th class="p-3 text-center">Conversiones</th>
+                                <th class="p-3 text-center">Win Rate</th>
+                                <th class="p-3 text-center">Yield</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody-embudo" class="divide-y divide-slate-200"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="view-agregar" class="space-y-6 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-amber-200">
+                    <h3 class="font-bold text-slate-800 text-base mb-2 flex items-center gap-2"><i
+                            class="fa-solid fa-pen-to-square text-amber-500"></i> Metas y Anotaciones</h3>
+                    <form id="form-note" onsubmit="saveCustomNote(event)" class="space-y-3 text-sm">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Entidad
+                                Target</label>
+                            <select id="note-route-select"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"></select>
+                        </div>
+                        <div class="target-col hidden">
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Objetivo Asignado
+                                ($)</label>
+                            <input type="number" id="note-target" placeholder="Ej. 200000"
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 uppercase mb-1">Logs
+                                Operativos</label>
+                            <textarea id="note-text" rows="3" placeholder="Ingresar logs..."
+                                class="w-full bg-slate-50 border border-slate-300 rounded-xl p-2.5 focus:ring-2 focus:ring-amber-500 focus:outline-none"></textarea>
+                        </div>
+                        <button type="submit"
+                            class="w-full bg-amber-500 hover:bg-amber-600 text-white font-semibold py-2.5 px-4 rounded-xl shadow transition"><i
+                                class="fa-solid fa-save mr-1"></i> Guardar Record</button>
+                    </form>
+                </div>
+                <div class="glass-card rounded-2xl p-5 shadow-sm border border-slate-200">
+                    <h3 class="font-bold text-slate-800 text-base mb-3 flex items-center gap-2"><i
+                            class="fa-solid fa-list-check text-slate-600"></i> Auditoría</h3>
+                    <div id="notes-list-container" class="space-y-3 max-h-96 overflow-y-auto pr-1"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        const daysList = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+        let initialData = [];
+        let notesList = [];
+        let globalMinDate = null;
+        let globalMaxDate = null;
+
+        let chartRutasInstance = null;
+        let chartHorariosInstance = null;
+        let chartDiasInstance = null;
+        let chartEmbudoInstance = null;
+        let chartMesesInstance = null;
+
+        let showTargets = false;
+        const TARGET_PASSWORD = "admin";
+
+        Chart.register(ChartDataLabels);
+
+        const metricLabels = {
+            'vta': 'Venta Total ($)',
+            'producto_x': 'Producto X (Unds)',
+            'producto_y': 'Producto Y (Unds)',
+            'otros': 'Otros Ingresos ($)'
+        };
+
+        function getUdn(r) { return r.udn || 'OTRO'; }
+
+        function getUdnBadge(udn) {
+            if (udn === 'ELEC') return '<span class="px-2 py-0.5 text-xs rounded font-bold bg-purple-100 text-purple-800 border border-purple-200">ELEC</span>';
+            if (udn === 'ACIA') return '<span class="px-2 py-0.5 text-xs rounded font-bold bg-teal-100 text-teal-800 border border-teal-200">ACIA</span>';
+            return `<span class="px-2 py-0.5 text-xs rounded font-bold bg-slate-100 text-slate-700">${udn}</span>`;
+        }
+
+        function getCategoryBadge(tipo) {
+            if (tipo === 'HOGAR') return '<span class="px-2 py-0.5 text-xs rounded font-medium badge-hogar">HOGAR</span>';
+            if (tipo === 'PDV_MA') return '<span class="px-2 py-0.5 text-xs rounded font-medium badge-pdv">MAYORISTA</span>';
+            if (tipo === 'DFS_CO') return '<span class="px-2 py-0.5 text-xs rounded font-medium badge-dfs">COMERCIAL</span>';
+            if (tipo === 'EMP') return '<span class="px-2 py-0.5 text-xs rounded font-medium badge-emp">EMPRESARIAL</span>';
+            return `<span class="px-2 py-0.5 text-xs rounded font-medium bg-slate-100 text-slate-700">${tipo}</span>`;
+        }
+
+        function toggleTargets() {
+            if (showTargets) {
+                showTargets = false;
+                document.getElementById('lock-icon').classList.replace('fa-unlock', 'fa-lock');
+                document.getElementById('lock-icon').classList.replace('text-emerald-400', 'text-slate-400');
+            } else {
+                const pwd = prompt("Auth Root required:");
+                if (pwd === TARGET_PASSWORD) {
+                    showTargets = true;
+                    document.getElementById('lock-icon').classList.replace('fa-lock', 'fa-unlock');
+                    document.getElementById('lock-icon').classList.replace('text-slate-400', 'text-emerald-400');
+                } else {
+                    if (pwd !== null) alert("Denied.");
+                    return;
+                }
+            }
+
+            const cols = document.querySelectorAll('.target-col');
+            cols.forEach(col => { showTargets ? col.classList.remove('hidden') : col.classList.add('hidden'); });
+            applyFilters();
+        }
+
+        async function fetchDataFromAPI() {
+            const badge = document.getElementById('sql-status-badge');
+
+            if (window.STATIC_DATA) {
+                initialData = window.STATIC_DATA;
+                notesList = window.STATIC_NOTES || [];
+                globalMinDate = window.STATIC_MIN_DATE;
+                globalMaxDate = window.STATIC_MAX_DATE;
+
+                const sdInput = document.getElementById('filter-start-date');
+                const edInput = document.getElementById('filter-end-date');
+
+                if (globalMinDate && !sdInput.value) sdInput.value = globalMinDate;
+                if (globalMaxDate && !edInput.value) edInput.value = globalMaxDate;
+
+                badge.className = "bg-purple-500/20 text-purple-400 text-xs px-3 py-1 rounded-full border border-purple-500/30 font-bold flex items-center gap-1.5";
+                badge.innerHTML = '<i class="fa-solid fa-file-code"></i> Data In-Memory (' + initialData.length + ' Entidades)';
+
+                document.getElementById('btn-refresh').style.display = 'none';
+                document.getElementById('btn-export-html').style.display = 'none';
+                sdInput.disabled = true; edInput.disabled = true;
+
+                populateSelectOptions(); applyFilters(); renderNotesList();
+                return;
+            }
+
+            badge.className = "bg-amber-500/20 text-amber-400 text-xs px-3 py-1 rounded-full border border-amber-500/30 font-medium flex items-center gap-1.5";
+            badge.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Fetching...';
+
+            const sd = document.getElementById('filter-start-date').value;
+            const ed = document.getElementById('filter-end-date').value;
+
+            let url = '/api/data';
+            const params = new URLSearchParams();
+            if (sd) params.append('start_date', sd);
+            if (ed) params.append('end_date', ed);
+            if (params.toString()) url += '?' + params.toString();
+
+            try {
+                const response = await fetch(url);
+                const json = await response.json();
+                if (!response.ok || json.error) throw new Error(json.detail || "API Failure");
+
+                initialData = json.data || [];
+                globalMinDate = json.min_date || globalMinDate;
+                globalMaxDate = json.max_date || globalMaxDate;
+
+                const sdInput = document.getElementById('filter-start-date');
+                const edInput = document.getElementById('filter-end-date');
+                if (globalMinDate && !sdInput.value) sdInput.value = globalMinDate;
+                if (globalMaxDate && !edInput.value) edInput.value = globalMaxDate;
+
+                badge.className = "bg-emerald-500/20 text-emerald-400 text-xs px-3 py-1 rounded-full border border-emerald-500/30 font-medium flex items-center gap-1.5";
+                badge.innerHTML = `<i class="fa-solid fa-circle text-[8px]"></i> Online Sync (${initialData.length} records)`;
+
+                populateSelectOptions(); applyFilters();
+            } catch (err) {
+                console.error(err);
+                badge.className = "bg-rose-500/20 text-rose-400 text-xs px-3 py-1 rounded-full border border-rose-500/30 font-medium flex items-center gap-1.5";
+                badge.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> Sync Error`;
+            }
+        }
+
+        function getRouteMetrics(r, timeVal, dayVal) {
+            let daysToProcess = (dayVal === 'all') ? daysList : [dayVal];
+            let slotsToProcess = (timeVal === 'all') ? ['before8', 'regular', 'after16'] : [timeVal];
+
+            let res = { vta: 0, producto_x: 0, producto_y: 0, otros: 0, clientes: 0, programados: 0, visitados: 0, compraron: 0 };
+
+            daysToProcess.forEach(d => {
+                if (r.dias && r.dias[d]) {
+                    slotsToProcess.forEach(s => {
+                        if (r.dias[d][s]) {
+                            let data = r.dias[d][s];
+                            res.vta += data.vta || 0;
+                            res.producto_x += data.producto_x || 0;
+                            res.producto_y += data.producto_y || 0;
+                            res.otros += data.otros || 0;
+                            res.clientes += data.clientes || 0;
+                            res.programados += data.programados || 0;
+                            res.visitados += data.visitados || 0;
+                            res.compraron += data.compraron || 0;
+                        }
+                    });
+                }
+            });
+            res.vta = Math.round(res.vta * 100) / 100;
+            res.otros = Math.round(res.otros * 100) / 100;
+            return res;
+        }
+
+        window.onload = function () { fetchDataFromAPI(); renderNotesList(); };
+        function onUdnChange() { populateRouteDropdown(); applyFilters(); }
+        function onCategoryChange() { populateRouteDropdown(); applyFilters(); }
+        function onDateChange() { if (window.STATIC_DATA) return; fetchDataFromAPI(); }
+
+        function populateRouteDropdown() {
+            const udnVal = document.getElementById('filter-udn').value;
+            const catVal = document.getElementById('filter-category').value;
+            const singleSelect = document.getElementById('filter-route');
+            const rankingVal = document.getElementById('filter-ranking').value;
+
+            singleSelect.innerHTML = '<option value="all_selected">-- Scope General --</option>';
+            let availableRoutes = initialData;
+            if (udnVal !== 'ALL') availableRoutes = availableRoutes.filter(r => getUdn(r) === udnVal);
+            if (catVal !== 'ALL') availableRoutes = availableRoutes.filter(r => r.tipo === catVal);
+
+            availableRoutes.forEach(r => singleSelect.innerHTML += `<option value="${r.ruta}">Ref ${r.ruta} [${getUdn(r)}]</option>`);
+            singleSelect.disabled = (rankingVal !== 'SPECIFIC');
+            if (rankingVal !== 'SPECIFIC') singleSelect.value = 'all_selected';
+        }
+
+        function populateSelectOptions() {
+            populateRouteDropdown();
+            const noteSelect = document.getElementById('note-route-select');
+            if (!noteSelect) return;
+            noteSelect.innerHTML = '';
+            initialData.forEach(r => noteSelect.innerHTML += `<option value="${r.ruta}">Ref ${r.ruta}</option>`);
+        }
+
+        function resetFilters() {
+            ['udn', 'category', 'metric', 'ranking', 'time', 'day'].forEach(id => document.getElementById('filter-' + id).value = document.getElementById('filter-' + id).options[0].value);
+            if (globalMinDate && !window.STATIC_DATA) document.getElementById('filter-start-date').value = globalMinDate;
+            if (globalMaxDate && !window.STATIC_DATA) document.getElementById('filter-end-date').value = globalMaxDate;
+            populateRouteDropdown();
+            window.STATIC_DATA ? applyFilters() : fetchDataFromAPI();
+        }
+
+        function applyFilters() {
+            const udnVal = document.getElementById('filter-udn').value;
+            const catVal = document.getElementById('filter-category').value;
+            const metricVal = document.getElementById('filter-metric').value;
+            const rankingVal = document.getElementById('filter-ranking').value;
+            const singleRouteVal = document.getElementById('filter-route').value;
+            const timeVal = document.getElementById('filter-time').value;
+            const dayVal = document.getElementById('filter-day').value;
+            const startDateVal = document.getElementById('filter-start-date').value;
+            const endDateVal = document.getElementById('filter-end-date').value;
+
+            document.getElementById('filter-route').disabled = (rankingVal !== 'SPECIFIC');
+
+            const getSelText = (id) => document.getElementById(id).options[document.getElementById(id).selectedIndex].text;
+            document.getElementById('badge-udn-filter').innerText = getSelText('filter-udn');
+            document.getElementById('badge-cat-filter').innerText = getSelText('filter-category');
+            document.getElementById('badge-metric-filter').innerText = metricLabels[metricVal];
+            document.getElementById('badge-time-filter').innerText = getSelText('filter-time');
+            document.getElementById('badge-day-filter').innerText = getSelText('filter-day');
+            document.getElementById('badge-date-filter').innerText = (startDateVal && endDateVal) ? `${startDateVal} / ${endDateVal}` : 'All';
+
+            let routes = initialData;
+            if (udnVal !== 'ALL') routes = routes.filter(r => getUdn(r) === udnVal);
+            if (catVal !== 'ALL') routes = routes.filter(r => r.tipo === catVal);
+
+            routes.sort((a, b) => getRouteMetrics(b, timeVal, dayVal)[metricVal] - getRouteMetrics(a, timeVal, dayVal)[metricVal]);
+
+            if (rankingVal === 'TOP3') routes = routes.slice(0, 3);
+            else if (rankingVal === 'TOP5') routes = routes.slice(0, 5);
+            else if (rankingVal === 'BOTTOM2') routes = routes.slice(-2);
+            else if (rankingVal === 'BOTTOM3') routes = routes.slice(-3);
+            else if (rankingVal === 'TOP3BOT2') routes = routes.length <= 5 ? routes : [...new Set([...routes.slice(0, 3), ...routes.slice(-2)])];
+            else if (rankingVal === 'SPECIFIC' && singleRouteVal !== 'all_selected' && singleRouteVal !== '') routes = routes.filter(r => r.ruta === singleRouteVal);
+
+            let vtaTotal = 0, prodX = 0, prodY = 0, clientesTot = 0, compraronTot = 0;
+            routes.forEach(r => {
+                const m = getRouteMetrics(r, timeVal, dayVal);
+                vtaTotal += m.vta; prodX += m.producto_x; prodY += m.producto_y; clientesTot += m.clientes; compraronTot += m.compraron;
+            });
+
+            document.getElementById('kpi-vta-total').innerText = `$${vtaTotal.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+            document.getElementById('kpi-producto_x').innerText = prodX.toLocaleString();
+            document.getElementById('kpi-producto_y').innerText = prodY.toLocaleString();
+            document.getElementById('kpi-clientes').innerText = clientesTot.toLocaleString();
+            document.getElementById('kpi-ticket').innerText = `$${(compraronTot > 0 ? (vtaTotal / compraronTot) : 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+            ['vta', 'producto_x', 'producto_y'].forEach(id => {
+                const el = document.getElementById(`card-kpi-${id}`);
+                if (el) { el.classList.remove('kpi-active'); el.classList.add('border-slate-200'); }
+            });
+            const activeEl = document.getElementById(`card-kpi-${metricVal}`);
+            if (activeEl) { activeEl.classList.remove('border-slate-200'); activeEl.classList.add('kpi-active'); }
+
+            document.getElementById('routes-table-counter').innerText = `${routes.length} Entidades`;
+            document.getElementById('chart-routes-count').innerText = `Dataset: ${routes.length}`;
+
+            renderGeneralTable(routes, timeVal, dayVal);
+            renderHorariosTable(routes, dayVal);
+            renderDiasTable(routes, timeVal);
+            renderMesesTable(routes, metricVal);
+            renderEmbudoTable(routes, timeVal, dayVal);
+            renderTopBottomCards(udnVal, catVal, timeVal, dayVal, metricVal);
+            updateCharts(routes, timeVal, dayVal, metricVal);
+        }
+
+        function renderGeneralTable(routes, timeVal, dayVal) {
+            const tbody = document.getElementById('tbody-general');
+            if (!tbody) return; tbody.innerHTML = '';
+            if (routes.length === 0) { tbody.innerHTML = '<tr><td colspan="10" class="p-4 text-center text-slate-400">Empty Scope.</td></tr>'; return; }
+
+            routes.forEach(r => {
+                const m = getRouteMetrics(r, timeVal, dayVal);
+                const unfilVta = getRouteMetrics(r, 'all', 'all').vta;
+                const target = r.target || (unfilVta * 1.05);
+                const pctCumpl = target > 0 ? ((unfilVta / target) * 100).toFixed(1) : '100.0';
+                const ticketProm = m.compraron > 0 ? (m.vta / m.compraron) : 0;
+                let pctClass = parseFloat(pctCumpl) < 80 ? 'text-rose-600 font-bold' : (parseFloat(pctCumpl) < 100 ? 'text-amber-600 font-bold' : 'text-emerald-600 font-bold');
+                const tv = showTargets ? '' : 'hidden';
+
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">Ref ${r.ruta} <span class="ml-1">${getUdnBadge(getUdn(r))}</span></td>
+                        <td class="p-3">${getCategoryBadge(r.tipo)}</td>
+                        <td class="p-3 font-extrabold text-blue-600">$${m.vta.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-3 font-semibold text-slate-700">${m.producto_x.toLocaleString()}</td>
+                        <td class="p-3 font-semibold text-slate-700">${m.producto_y.toLocaleString()}</td>
+                        <td class="p-3 text-slate-600">$${m.otros.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-3 text-slate-700">${m.compraron}</td>
+                        <td class="p-3 text-slate-700">$${ticketProm.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-3 text-slate-500 target-col ${tv}">$${target.toLocaleString('es-MX', { minimumFractionDigits: 2 })}</td>
+                        <td class="p-3 ${pctClass} target-col ${tv}">${pctCumpl}%</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderHorariosTable(routes, dayVal) {
+            const tbody = document.getElementById('tbody-horarios');
+            if (!tbody) return;
+            let matVta = 0, matPzas = 0, matCli = 0, matComp = 0, vespVta = 0, vespPzas = 0, vespCli = 0, vespComp = 0;
+
+            routes.forEach(r => {
+                const mMat = getRouteMetrics(r, 'before8', dayVal);
+                const mVesp = getRouteMetrics(r, 'after16', dayVal);
+                matVta += mMat.vta; matPzas += mMat.producto_x; matCli += mMat.clientes; matComp += mMat.compraron;
+                vespVta += mVesp.vta; vespPzas += mVesp.producto_x; vespCli += mVesp.clientes; vespComp += mVesp.compraron;
+            });
+
+            document.getElementById('horario-mat-vta').innerText = `$${matVta.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+            document.getElementById('horario-mat-pzas').innerText = `${matPzas.toLocaleString()}`;
+            document.getElementById('horario-mat-cli').innerText = matCli.toLocaleString();
+            document.getElementById('horario-mat-ticket').innerText = `$${(matComp > 0 ? matVta / matComp : 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+            document.getElementById('horario-vesp-vta').innerText = `$${vespVta.toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+            document.getElementById('horario-vesp-pzas').innerText = `${vespPzas.toLocaleString()}`;
+            document.getElementById('horario-vesp-cli').innerText = vespCli.toLocaleString();
+            document.getElementById('horario-vesp-ticket').innerText = `$${(vespComp > 0 ? vespVta / vespComp : 0).toLocaleString('es-MX', { minimumFractionDigits: 2 })}`;
+
+            tbody.innerHTML = '';
+            routes.forEach(r => {
+                const mAll = getRouteMetrics(r, 'all', dayVal), mMat = getRouteMetrics(r, 'before8', dayVal), mVesp = getRouteMetrics(r, 'after16', dayVal), mReg = getRouteMetrics(r, 'regular', dayVal);
+                const totalVta = mAll.vta > 0 ? mAll.vta : 1;
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="p-3 font-bold text-slate-800">Ref ${r.ruta}</td><td class="p-3">${getCategoryBadge(r.tipo)}</td>
+                        <td class="p-3 font-semibold text-amber-700">$${mMat.vta.toLocaleString('es-MX')}</td><td class="p-3 text-slate-600">${((mMat.vta / totalVta) * 100).toFixed(1)}%</td>
+                        <td class="p-3 font-semibold text-indigo-700">$${mVesp.vta.toLocaleString('es-MX')}</td><td class="p-3 text-slate-600">${((mVesp.vta / totalVta) * 100).toFixed(1)}%</td>
+                        <td class="p-3 font-semibold text-slate-700">$${mReg.vta.toLocaleString('es-MX')}</td><td class="p-3 text-slate-600">${((mReg.vta / totalVta) * 100).toFixed(1)}%</td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderDiasTable(routes, timeVal) {
+            const tbody = document.getElementById('tbody-dias'); if (!tbody) return; tbody.innerHTML = '';
+            routes.forEach(r => {
+                let rowTotal = 0, dayCellsHtml = '';
+                daysList.forEach(d => {
+                    const mDay = getRouteMetrics(r, timeVal, d); rowTotal += mDay.vta;
+                    dayCellsHtml += `<td class="p-3 font-medium text-slate-700">$${mDay.vta.toLocaleString('es-MX')}</td>`;
+                });
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold text-slate-800">${r.ruta}</td><td class="p-3">${getCategoryBadge(r.tipo)}</td>${dayCellsHtml}<td class="p-3 font-extrabold text-emerald-600">$${rowTotal.toLocaleString('es-MX')}</td></tr>`;
+            });
+        }
+
+        function renderMesesTable(routes, metricVal) {
+            const tbody = document.getElementById('tbody-meses'), theadTr = document.getElementById('thead-tr-meses');
+            if (!tbody || !theadTr) return;
+            let uniqueMonths = new Set();
+            routes.forEach(r => { if (r.meses) Object.keys(r.meses).forEach(m => uniqueMonths.add(m)); });
+            let monthsList = Array.from(uniqueMonths).sort();
+            let headersHtml = `<th class="p-3">Ref</th><th class="p-3">Segmento</th>`;
+            monthsList.forEach(m => headersHtml += `<th class="p-3 text-center">${m}</th>`);
+            theadTr.innerHTML = headersHtml + `<th class="p-3 text-center">Acumulado</th>`;
+            tbody.innerHTML = '';
+            routes.forEach(r => {
+                let rowTotal = 0, cellsHtml = '';
+                monthsList.forEach(m => {
+                    let val = (r.meses && r.meses[m]) ? (r.meses[m][metricVal] || 0) : 0; rowTotal += val;
+                    cellsHtml += `<td class="p-3 text-center font-medium">${(metricVal === 'vta' || metricVal === 'otros') ? '$' + val.toLocaleString('es-MX') : val.toLocaleString()}</td>`;
+                });
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold">${r.ruta}</td><td class="p-3">${getCategoryBadge(r.tipo)}</td>${cellsHtml}<td class="p-3 text-center font-extrabold text-purple-600">${(metricVal === 'vta' || metricVal === 'otros') ? '$' + rowTotal.toLocaleString('es-MX') : rowTotal.toLocaleString()}</td></tr>`;
+            });
+        }
+
+        function renderEmbudoTable(routes, timeVal, dayVal) {
+            const tbody = document.getElementById('tbody-embudo'); if (!tbody) return; tbody.innerHTML = '';
+            let sumProg = 0, sumVis = 0, sumComp = 0;
+            routes.forEach(r => {
+                const m = getRouteMetrics(r, timeVal, dayVal);
+                sumProg += m.programados; sumVis += m.visitados; sumComp += m.compraron;
+                tbody.innerHTML += `<tr class="hover:bg-slate-50 transition"><td class="p-3 font-bold">${r.ruta}</td><td class="p-3 text-center">${m.programados.toLocaleString()}</td><td class="p-3 text-center text-blue-600 font-bold">${m.visitados.toLocaleString()}</td><td class="p-3 text-center">${m.programados > 0 ? ((m.visitados / m.programados) * 100).toFixed(1) : 0}%</td><td class="p-3 text-center text-emerald-600 font-bold">${m.compraron.toLocaleString()}</td><td class="p-3 text-center">${m.visitados > 0 ? ((m.compraron / m.visitados) * 100).toFixed(1) : 0}%</td><td class="p-3 text-center font-bold text-slate-700">${m.programados > 0 ? ((m.compraron / m.programados) * 100).toFixed(1) : 0}%</td></tr>`;
+            });
+            document.getElementById('embudo-prog').innerText = sumProg.toLocaleString();
+            document.getElementById('embudo-vis').innerText = sumVis.toLocaleString();
+            document.getElementById('embudo-comp').innerText = sumComp.toLocaleString();
+            document.getElementById('embudo-pct-vis').innerText = `${sumProg > 0 ? ((sumVis / sumProg) * 100).toFixed(1) : 0}% Rate`;
+            document.getElementById('embudo-pct-comp').innerText = `${sumVis > 0 ? ((sumComp / sumVis) * 100).toFixed(1) : 0}% Win`;
+        }
+
+        function renderTopBottomCards(udnVal, catVal, timeVal, dayVal, metricVal) {
+            const topList = document.getElementById('top-list-cards'); const bottomList = document.getElementById('bottom-list-cards');
+            topList.innerHTML = ''; bottomList.innerHTML = '';
+            let filtered = initialData;
+            if (udnVal !== 'ALL') filtered = filtered.filter(r => getUdn(r) === udnVal);
+            if (catVal !== 'ALL') filtered = filtered.filter(r => r.tipo === catVal);
+            filtered.sort((a, b) => getRouteMetrics(b, timeVal, dayVal)[metricVal] - getRouteMetrics(a, timeVal, dayVal)[metricVal]);
+
+            document.getElementById('top-category-badge').innerText = catVal; document.getElementById('bottom-category-badge').innerText = catVal;
+
+            const formatVal = (mVal) => (metricVal === 'vta' || metricVal === 'otros') ? `$${mVal.toLocaleString('es-MX')}` : `${mVal.toLocaleString()} units`;
+
+            filtered.slice(0, 5).forEach((r, idx) => {
+                topList.innerHTML += `<div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between"><div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex justify-center items-center">#${idx + 1}</span><span class="font-bold text-sm text-slate-800">${r.ruta}</span></div><span class="font-extrabold text-blue-600 text-sm">${formatVal(getRouteMetrics(r, timeVal, dayVal)[metricVal])}</span></div>`;
+            });
+            filtered.slice(Math.max(0, filtered.length - 5)).reverse().forEach((r, idx) => {
+                bottomList.innerHTML += `<div class="bg-white p-3 rounded-xl border border-slate-200 flex justify-between"><div class="flex items-center gap-3"><span class="w-6 h-6 rounded-full bg-rose-100 text-rose-800 font-bold text-xs flex justify-center items-center">#${filtered.length - idx}</span><span class="font-bold text-sm text-slate-800">${r.ruta}</span></div><span class="font-extrabold text-rose-600 text-sm">${formatVal(getRouteMetrics(r, timeVal, dayVal)[metricVal])}</span></div>`;
+            });
+        }
+
+        function updateCharts(routes, timeVal, dayVal, metricVal = 'vta') {
+            const labels = routes.map(r => r.ruta);
+            const metricData = routes.map(r => getRouteMetrics(r, timeVal, dayVal)[metricVal]);
+
+            if (chartRutasInstance) chartRutasInstance.destroy();
+            chartRutasInstance = new Chart(document.getElementById('chart-ventas-rutas').getContext('2d'), {
+                type: 'bar', data: { labels: labels, datasets: [{ label: metricLabels[metricVal], data: metricData, backgroundColor: '#2563eb', borderRadius: 6 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } }, scales: { y: { beginAtZero: true } } }
+            });
+
+            let sB = routes.reduce((a, b) => a + getRouteMetrics(b, 'before8', dayVal)[metricVal], 0);
+            let sR = routes.reduce((a, b) => a + getRouteMetrics(b, 'regular', dayVal)[metricVal], 0);
+            let sA = routes.reduce((a, b) => a + getRouteMetrics(b, 'after16', dayVal)[metricVal], 0);
+
+            if (chartHorariosInstance) chartHorariosInstance.destroy();
+            chartHorariosInstance = new Chart(document.getElementById('chart-horarios').getContext('2d'), {
+                type: 'doughnut', data: { labels: ['Madrugada', 'Regular', 'Tarde'], datasets: [{ data: [sB, sR, sA], backgroundColor: ['#f59e0b', '#94a3b8', '#6366f1'], borderWidth: 2, borderColor: '#ffffff' }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, datalabels: { color: '#ffffff', font: { weight: 'bold', size: 12 }, textStrokeColor: '#000000', textStrokeWidth: 3, formatter: (v, ctx) => { let s = 0; ctx.chart.data.datasets[0].data.forEach(d => { s += d; }); return (s === 0 || v === 0) ? null : (v * 100 / s).toFixed(1) + "%"; } } } }
+            });
+
+            const daySums = daysList.map(d => routes.reduce((s, r) => s + getRouteMetrics(r, timeVal, d)[metricVal], 0));
+            if (chartDiasInstance) chartDiasInstance.destroy();
+            chartDiasInstance = new Chart(document.getElementById('chart-dias').getContext('2d'), {
+                type: 'line', data: { labels: daysList, datasets: [{ label: metricLabels[metricVal], data: daySums, borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+            });
+
+            let sP = 0, sV = 0, sC = 0; routes.forEach(r => { const m = getRouteMetrics(r, timeVal, dayVal); sP += m.programados; sV += m.visitados; sC += m.compraron; });
+            if (chartEmbudoInstance) chartEmbudoInstance.destroy();
+            chartEmbudoInstance = new Chart(document.getElementById('chart-embudo').getContext('2d'), {
+                type: 'bar', data: { labels: ['Ops', 'Contacts', 'Wins'], datasets: [{ data: [sP, sV, sC], backgroundColor: ['#94a3b8', '#3b82f6', '#10b981'], borderRadius: 6 }] },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { color: '#ffffff', font: { weight: 'bold' }, formatter: (v) => `${v.toLocaleString()} (${sP > 0 ? ((v / sP) * 100).toFixed(1) : 0}%)` } }, scales: { x: { display: false } } }
+            });
+
+            let uM = new Set(); routes.forEach(r => { if (r.meses) Object.keys(r.meses).forEach(m => uM.add(m)); });
+            let mL = Array.from(uM).sort();
+            const mS = mL.map(m => routes.reduce((s, r) => s + (r.meses && r.meses[m] ? (r.meses[m][metricVal] || 0) : 0), 0));
+            if (chartMesesInstance) chartMesesInstance.destroy();
+            chartMesesInstance = new Chart(document.getElementById('chart-meses').getContext('2d'), {
+                type: 'line', data: { labels: mL, datasets: [{ data: mS, borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)', fill: true, tension: 0.3 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, datalabels: { display: false } } }
+            });
+        }
+
+        function switchTab(tabId) {
+            ['dashboard', 'horarios', 'dias', 'meses', 'rutas', 'embudo', 'agregar'].forEach(t => { document.getElementById(`view-${t}`).classList.add('hidden'); document.getElementById(`tab-${t}`).classList.remove('active'); });
+            document.getElementById(`view-${tabId}`).classList.remove('hidden'); document.getElementById(`tab-${tabId}`).classList.add('active');
+        }
+
+        function saveCustomNote(e) {
+            e.preventDefault(); const rt = document.getElementById('note-route-select').value, tgt = parseFloat(document.getElementById('note-target').value), txt = document.getElementById('note-text').value.trim();
+            if (tgt) { const tR = initialData.find(r => r.ruta === rt); if (tR) tR.target = tgt; }
+            if (txt) notesList.unshift({ id: Date.now(), ruta: rt, note: txt, date: new Date().toISOString().split('T')[0] });
+            document.getElementById('note-target').value = ''; document.getElementById('note-text').value = ''; renderNotesList(); applyFilters();
+        }
+
+        function renderNotesList() {
+            const c = document.getElementById('notes-list-container'); if (!c) return; c.innerHTML = '';
+            if (!notesList.length) { c.innerHTML = '<p class="text-xs text-slate-400">Empty Logs.</p>'; return; }
+            notesList.forEach(n => c.innerHTML += `<div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-xs"><div class="flex justify-between font-bold text-blue-700 mb-1"><span>Ref ${n.ruta}</span><span class="text-slate-400 font-normal">${n.date}</span></div><p class="text-slate-700">${n.note}</p></div>`);
+        }
+
+        function exportDataCSV() {
+            let csv = 'Entidad,UDN,Tipo,Venta,Producto X,Producto Y,Otros,Clientes,Ticket Promedio,Programados,Visitados,Conversiones\n';
+            initialData.forEach(r => {
+                const m = getRouteMetrics(r, 'all', 'all'); const tk = m.compraron > 0 ? (m.vta / m.compraron).toFixed(2) : '0';
+                csv += `${r.ruta},${getUdn(r)},${r.tipo},${m.vta},${m.producto_x},${m.producto_y},${m.otros},${m.clientes},${tk},${m.programados},${m.visitados},${m.compraron}\n`;
+            });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' })); link.download = `Dataset_Export.csv`; link.click();
+        }
+
+        async function exportStaticHTML() {
+            if (!initialData || !initialData.length) return alert("Empty dataset.");
+            try {
+                const response = await fetch(window.location.href); let raw = await response.text();
+                const b64Data = btoa(unescape(encodeURIComponent(JSON.stringify(initialData))));
+                const b64Notes = btoa(unescape(encodeURIComponent(JSON.stringify(notesList))));
+                const dataScript = `<script id="static-data">const b64d="${b64Data}"; const b64n="${b64Notes}"; window.STATIC_DATA=JSON.parse(decodeURIComponent(escape(atob(b64d)))); window.STATIC_NOTES=JSON.parse(decodeURIComponent(escape(atob(b64n)))); window.STATIC_MIN_DATE="${globalMinDate || ''}"; window.STATIC_MAX_DATE="${globalMaxDate || ''}";<\/script>`;
+                const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([raw.replace('</head>', dataScript + '\n</head>')], { type: 'text/html;charset=utf-8;' })); link.download = `Snapshot_${Date.now()}.html`; link.click();
+            } catch (err) { console.error(err); alert("Export failed."); }
+        }
+    </script>
+</body>
+
+</html>

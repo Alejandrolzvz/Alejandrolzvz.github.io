@@ -1,0 +1,184 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalles del Registro #{{ registro['id'] }}</h2>
+    <a href="{{ url_for('osmosis_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<div class="card mb-4 shadow-sm">
+    <div class="card-header bg-dark text-white fw-bold">
+        Resumen de Captura
+    </div>
+    <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-3"><strong>Fecha Lectura:</strong> {{ registro['fecha'] }}</div>
+            <div class="col-md-3"><strong>Hora Monitoreo:</strong> {{ registro['hora_monitoreo'] }}</div>
+            <div class="col-md-3"><strong>Planta:</strong> {{ registro['planta'] }}</div>
+            <div class="col-md-3">
+                <strong>Estatus Equipo:</strong> 
+                {% if registro['estatus_equipo'] == 'Encendido' %}
+                    <span class="badge bg-success">Encendido</span>
+                {% else %}
+                    <span class="badge bg-secondary">Apagado</span>
+                {% endif %}
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6"><strong>Hora en Sistema (Guardado):</strong> <small class="text-muted">{{ registro['created_at'] }}</small></div>
+        </div>
+    </div>
+</div>
+
+{% if registro['estatus_equipo'] == 'Encendido' %}
+<div class="row g-4">
+    <div class="col-md-6">
+        <ul class="list-group list-group-flush shadow-sm">
+            <li class="list-group-item bg-light fw-bold text-primary">Presiones (Psi)</li>
+            <li class="list-group-item d-flex justify-content-between"><span>Arranque:</span> <strong>{{ registro['presion_arranque'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Agua Cruda:</span> <strong>{{ registro['presion_agua_cruda'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Pre Filtración:</span> <strong>{{ registro['presion_pre_filtracion'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Post Filtración:</span> <strong>{{ registro['presion_post_filtracion'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Pre Membranas:</span> <strong>{{ registro['presion_pre_membranas'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Post Membranas:</span> <strong>{{ registro['presion_post_membranas'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>De Bombas:</span> <strong>{{ registro['presion_bombas'] or '-' }}</strong></li>
+        </ul>
+    </div>
+    <div class="col-md-6">
+        <ul class="list-group list-group-flush shadow-sm mb-4">
+            <li class="list-group-item bg-light fw-bold text-primary">Presión en Filtros (Psi) y Suavizadores</li>
+            <li class="list-group-item d-flex justify-content-between"><span>Filtro de Arena:</span> <strong>{{ registro['filtro_arena'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Filtro de Carbón:</span> <strong>{{ registro['filtro_carbon'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Suavizador (#):</span> <strong>{{ registro['suavizador_num'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Entrada Suavizador:</span> <strong>{{ registro['entrada_suavizador'] or '-' }}</strong></li>
+            <li class="list-group-item d-flex justify-content-between"><span>Salida Suavizador:</span> <strong>{{ registro['salida_suavizador'] or '-' }}</strong></li>
+        </ul>
+
+        <div class="row g-2">
+            <div class="col-sm-6">
+                <ul class="list-group list-group-flush shadow-sm">
+                    <li class="list-group-item bg-light fw-bold text-primary">Rotámetros (gpm)</li>
+                    <li class="list-group-item d-flex justify-content-between"><span>De Productos:</span> <strong class="ms-2">{{ registro['rotametro_productos'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>De Rechazo:</span> <strong class="ms-2">{{ registro['rotametro_rechazo'] or '-' }}</strong></li>
+                </ul>
+            </div>
+            <div class="col-sm-6">
+                <ul class="list-group list-group-flush shadow-sm">
+                    <li class="list-group-item bg-light fw-bold text-primary">Sensores y Lectores</li>
+                    <li class="list-group-item d-flex justify-content-between"><span>pH:</span> <strong class="ms-2">{{ registro['sensor_ph'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>S.T.D:</span> <strong class="ms-2">{{ registro['sensor_std'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Amperímetro:</span> <strong class="ms-2">{{ registro['amperimetro'] or '-' }}</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Horómetro:</span> <strong class="ms-2">{{ registro['horometro'] or '-' }}</strong></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mt-4 shadow-sm border-primary">
+    <div class="card-header bg-white fw-bold text-primary">S.T.D. (ppm) por Vaso y Entradas</div>
+    <div class="card-body">
+        <div class="row text-center mb-3">
+            <div class="col-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 1</small>
+                    <strong>{{ registro['sdt_vaso1'] or '-' }}</strong>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 2</small>
+                    <strong>{{ registro['sdt_vaso2'] or '-' }}</strong>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 3</small>
+                    <strong>{{ registro['sdt_vaso3'] or '-' }}</strong>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 4</small>
+                    <strong>{{ registro['sdt_vaso4'] or '-' }}</strong>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="p-2 bg-light border rounded">
+                    <small class="d-block text-muted">Vaso 5</small>
+                    <strong>{{ registro['sdt_vaso5'] or '-' }}</strong>
+                </div>
+            </div>
+            <div class="col-2">
+                <div class="p-2 bg-info border rounded text-white">
+                    <small class="d-block">Final</small>
+                    <strong>{{ registro['sdt_final'] or '-' }}</strong>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-md-6 border-end">
+                <span class="text-muted">Entrada Ósmosis SDT:</span> <strong class="fs-5 ms-2">{{ registro['entrada_osmosis_sdt'] or '-' }}</strong>
+            </div>
+            <div class="col-md-6 text-end">
+                <span class="text-muted">Entrada Ósmosis DT:</span> <strong class="fs-5 ms-2">{{ registro['entrada_osmosis_dt'] or '-' }}</strong>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="alert alert-secondary text-center mt-4">
+    <h5><span class="badge bg-secondary">Aviso</span></h5>
+    <p>El equipo fue registrado como <strong>Apagado</strong> en esta lectura.</p>
+    <p class="mb-0">No hay información métrica aplicable (Presiones, Rotámetros, etc.) para visualizar en este registro.</p>
+</div>
+{% endif %}
+
+<div class="card mt-4 mb-5 shadow-sm">
+    <div class="card-header bg-warning text-dark fw-bold border-warning">
+        Observaciones
+    </div>
+    <div class="card-body">
+        {% if registro['observaciones'] %}
+            <p class="mb-0">{{ registro['observaciones'] }}</p>
+        {% else %}
+            <p class="text-muted fst-italic mb-0">No se registraron observaciones en esta lectura.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Botón final para imprimir o regresar -->
+<div class="mb-5 d-flex justify-content-end">
+    <a href="{{ url_for('osmosis_index') }}" class="btn btn-secondary me-2">Regresar</a>
+    <button onclick="window.print()" class="btn btn-primary"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+</div>
+
+<!-- Opcional (Si no usas logotipos o iconos extra ignorar style para impresion) -->
+<style>
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 5px !important; text-align: center; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 1px solid black !important; }
+    body { padding: 0 !important; margin: 0 !important; }
+
+    .btn, .badge {
+        display: none !important;
+    }
+    .card {
+        border: 1px solid #000 !important;
+    }
+    .bg-light, .bg-dark, .bg-warning {
+        background-color: transparent !important;
+        color: #000 !important;
+        border-bottom: 2px solid #000 !important;
+    }
+    body {
+        margin: 0;
+        padding: 0;
+    }
+}
+</style>
+{% endblock %}

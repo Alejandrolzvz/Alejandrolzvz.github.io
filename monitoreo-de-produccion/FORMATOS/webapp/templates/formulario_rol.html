@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('lista_roles') }}" class="btn btn-outline-secondary btn-sm me-3" title="Volver">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="mb-0">
+                <i class="bi bi-{{ 'pencil-square' if rol else 'plus-circle' }} me-2"></i>
+                {{ 'Editar Rol' if rol else 'Nuevo Rol' }}
+            </h2>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="name" class="form-label fw-bold">Nombre del Rol</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ rol.name if rol else '' }}" 
+                               placeholder="Ej: SUPERVISOR" 
+                               {{ 'readonly' if rol and rol.id <= 2 else '' }}
+                               required>
+                        {% if rol and rol.id <= 2 %}
+                        <div class="form-text text-info">
+                            <i class="bi bi-info-circle me-1"></i> Los roles básicos del sistema no pueden ser renombrados.
+                        </div>
+                        {% else %}
+                        <div class="form-text">Usa nombres descriptivos en MAYÚSCULAS.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="description" class="form-label fw-bold">Descripción</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" 
+                                  placeholder="Describe las responsabilidades de este rol...">{{ rol.description if rol else '' }}</textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="bi bi-save me-2"></i> {{ 'Guardar Cambios' if rol else 'Crear Rol' }}
+                        </button>
+                        <a href="{{ url_for('lista_roles') }}" class="btn btn-link text-muted">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

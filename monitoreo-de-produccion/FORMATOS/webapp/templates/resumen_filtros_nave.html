@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Filtros y Nave</h2>
+    <div>
+        <a href="{{ url_for('filtros_nave_index') }}" class="btn btn-secondary me-2">
+            &larr; Volver
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Reporte Consolidado: {{ fecha_seleccionada }}</span>
+        <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+    </div>
+    <div class="card-body bg-light">
+        <form action="{{ url_for('resumen_filtros_nave') }}" method="GET" class="d-flex align-items-center">
+            <label for="fecha" class="form-label me-3 fw-bold mb-0">Seleccionar Fecha:</label>
+            <input type="date" class="form-control me-3" style="max-width: 200px;" id="fecha" name="fecha"
+                value="{{ fecha_seleccionada }}" required>
+            <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Consultar</button>
+        </form>
+    </div>
+</div>
+
+{% if registros %}
+<div class="table-responsive">
+    <table class="table table-bordered table-striped align-middle">
+        <thead class="table-dark text-center">
+            <tr>
+                <th>ID</th>
+                <th>Ejecutado por</th>
+                <th>Responsable</th>
+                <th>Cumplimiento General</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in registros %}
+            <tr>
+                <td class="text-center fw-bold">{{ r['id'] }}</td>
+                <td>{{ r['firma_ejecuta'] }}</td>
+                <td>{{ r['firma_responsable'] }}</td>
+                <td class="text-center">
+                    {% set totales = 10 %}
+                    {% set cumple_count = r['limpieza_general_cumple'] + r['limpieza_profunda_cumple'] +
+                    r['material_prueba_cumple'] + r['infraestructura_pintado_cumple'] +
+                    r['infraestructura_tuberias_cumple'] + r['mantenimiento_calcas_area_cumple'] +
+                    r['mantenimiento_calcas_lavadora_cumple'] + r['documentacion_archivos_cumple'] +
+                    r['documentacion_firmas_cumple'] %}
+                    <span
+                        class="badge bg-{% if cumple_count == totales %}success{% elif cumple_count >= totales-2 %}warning text-dark{% else %}danger{% endif %} text-wrap"
+                        style="font-size: 0.9rem;">
+                        {{ cumple_count }} / {{ totales }}
+                    </span>
+                </td>
+                <td class="text-center">
+                    <a href="{{ url_for('detalle_filtros_nave', id=r['id']) }}" class="btn btn-sm btn-info text-white"
+                        target="_blank">
+                        <i class="bi bi-eye"></i> Detalle
+                    </a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="alert alert-info text-center mt-4">
+    <i class="bi bi-info-circle me-2"></i> No se encontraron registros de Check List para la fecha seleccionada.
+</div>
+{% endif %}
+
+<style>
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    body { padding: 0 !important; margin: 0 !important; background-color: white !important; }
+    nav, header, footer, .sidebar, .btn, form, a.btn, a { display: none !important; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 10px !important; text-align: center; color: black !important; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 2px solid black !important; }
+    .card { border: none !important; box-shadow: none !important; margin: 0 !important; }
+    .table-responsive { max-height: none !important; overflow: visible !important; }
+    .sticky-col { position: static !important; border-right: none !important; }
+    table { page-break-inside: auto; font-size: 0.70rem !important; width: 100% !important; color: black !important; border-collapse: collapse !important; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+    .table-dark, .table-secondary, .table-light, .bg-light, .bg-dark { background-color: transparent !important; color: #000 !important; }
+    th, td { border: 1px solid #000 !important; padding: 4px !important; }
+    .badge { border: 1px solid #000; color: #000 !important; background-color: transparent !important; }
+    .text-primary, .text-danger, .text-success, .text-warning, .text-info { color: black !important; }
+}
+</style>
+{% endblock %}

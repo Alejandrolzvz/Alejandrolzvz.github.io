@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="bi bi-people-fill me-2"></i>Gestión de Usuarios</h2>
+        <p class="text-muted">Administra las cuentas de acceso, roles y permisos del sistema.</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a href="{{ url_for('nuevo_usuario') }}" class="btn btn-primary">
+            <i class="bi bi-person-plus-fill me-1"></i> Nuevo Usuario
+        </a>
+
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Usuario</th>
+                        <th>Rol / Nivel de Acceso</th>
+                        <th>Fecha de Registro</th>
+                        <th class="text-end pe-4">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in usuarios %}
+                    <tr>
+                        <td class="ps-4">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-light rounded-circle p-2 me-3">
+                                    <i class="bi bi-person text-secondary"></i>
+                                </div>
+                                <div>
+                                    <span class="fw-bold d-block">{{ user.username }}</span>
+                                    <small class="text-muted">ID: #{{ user.id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge {{ 'bg-primary' if user.role_name == 'ADMIN' else 'bg-info text-dark' }}">
+                                <i class="bi bi-shield-check me-1"></i> {{ user.role_name }}
+                            </span>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ user.created_at[:16] }}</small>
+                        </td>
+                        <td class="text-end pe-4">
+                            <a href="{{ url_for('editar_usuario', id=user.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            
+                            {% if user.id != current_user.id and user.id != 1 %}
+                            <form action="{{ url_for('eliminar_usuario', id=user.id) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Estás seguro de que deseas eliminar permanentemente al usuario {{ user.username }}?')">
+                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-secondary" disabled title="Protegido">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="mt-4 alert alert-light border shadow-sm" role="alert">
+    <i class="bi bi-info-circle-fill me-2 text-primary"></i>
+    <strong>Seguridad:</strong> El administrador con <strong>ID #1</strong> está protegido contra degradación de rol o eliminación para asegurar siempre el acceso al sistema.
+</div>
+{% endblock %}

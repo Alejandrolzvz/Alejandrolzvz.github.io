@@ -1,0 +1,141 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Resumen Diario: Ósmosis Inversa</h2>
+    
+    <div class="d-flex align-items-center">
+        <!-- Formulario para cambiar la fecha -->
+        <form class="d-flex align-items-center me-3" method="GET" action="{{ url_for('resumen_diario') }}">
+            <label for="fecha_q" class="me-2 fw-bold">Fecha:</label>
+            <input type="date" id="fecha_q" name="fecha" class="form-control me-2" value="{{ fecha_seleccionada }}" onchange="this.form.submit()">
+            <a href="{{ url_for('resumen_diario') }}" class="btn btn-outline-secondary btn-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('osmosis_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-dark text-white fw-bold d-flex justify-content-between align-items-center">
+        <span>Reporte Consolidado: {{ fecha_seleccionada }}</span>
+        <button onclick="window.print()" class="btn btn-sm btn-light"><i class="bi bi-printer"></i> Imprimir Reporte</button>
+    </div>
+    <div class="card-body p-0">
+        <!-- Tabla con scroll horizontal y fila transpuesta -->
+        <div class="table-responsive m-0 border-0" style="max-height: 700px; overflow-y: auto;">
+            <table class="table table-bordered table-striped table-hover align-middle mb-0 text-center" style="min-width: 800px; font-size: 0.85rem;">
+                <thead class="table-secondary sticky-top">
+                    <tr>
+                        <th class="text-start bg-light sticky-col" style="min-width: 250px; z-index: 10;">Parámetro / Hora</th>
+                        {% for reg in registros %}
+                            <th>{{ reg['hora_monitoreo'] }}</th>
+                        {% else %}
+                            <th>Sin registros</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- INFORMACIÓN GENERAL -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Información General</td></tr>
+                    <tr><td class="text-start fw-bold bg-light sticky-col">Planta</td>{% for reg in registros %}<td>{{ reg['planta'] }}</td>{% endfor %}</tr>
+                    <tr><td class="text-start fw-bold bg-light sticky-col">Estatus</td>
+                        {% for reg in registros %}
+                            <td>
+                                {% if reg['estatus_equipo'] == 'Encendido' %} <span class="badge bg-success">ON</span>
+                                {% else %} <span class="badge bg-secondary">OFF</span> {% endif %}
+                            </td>
+                        {% endfor %}
+                    </tr>
+
+                    <!-- PRESIONES -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Presiones (Psi)</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Arranque <span class="text-muted" style="font-size: 0.70rem;">(80-100)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_arranque'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Agua Cruda <span class="text-muted" style="font-size: 0.70rem;">(40-50)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_agua_cruda'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Pre Filtración <span class="text-muted" style="font-size: 0.70rem;">(20-30)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_pre_filtracion'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Post Filtración <span class="text-muted" style="font-size: 0.70rem;">(20-30)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_post_filtracion'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Pre Membranas <span class="text-muted" style="font-size: 0.70rem;">(140-150)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_pre_membranas'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Post Membranas <span class="text-muted" style="font-size: 0.70rem;">(90-100)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_post_membranas'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">De Bombas <span class="text-muted" style="font-size: 0.70rem;">(150)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['presion_bombas'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+
+                    <!-- ROTAMETROS -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Rotámetros (gpm)</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Productos <span class="text-muted" style="font-size: 0.70rem;">(80-90)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['rotametro_productos'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Rechazo <span class="text-muted" style="font-size: 0.70rem;">(18-20)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['rotametro_rechazo'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+
+                    <!-- SENSORES / LECTORES -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Sensores y Lectores</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">pH <span class="text-muted" style="font-size: 0.70rem;">(6.5-7.0)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['sensor_ph'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">S.T.D <span class="text-muted" style="font-size: 0.70rem;">(40-60)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['sensor_std'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Amperímetro <span class="text-muted" style="font-size: 0.70rem;">(40)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['amperimetro'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Horómetro</td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['horometro'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+
+                    <!-- FILTROS Y SUAVIZADORES -->
+                    <tr class="table-dark text-white"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Presión en Filtros (Psi) y Suavizadores</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Filtro de Arena <span class="text-muted" style="font-size: 0.70rem;">(60-80)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['filtro_arena'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Filtro de Carbón <span class="text-muted" style="font-size: 0.70rem;">(50-60)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['filtro_carbon'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Suavizador (#)</td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['suavizador_num'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Entrada Suavizador <span class="text-muted" style="font-size: 0.70rem;">(50-70)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['entrada_suavizador'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+                    <tr><td class="text-start bg-light sticky-col">Salida Suavizador <span class="text-muted" style="font-size: 0.70rem;">(45-55)</span></td>
+                        {% for reg in registros %} <td>{% if reg['estatus_equipo'] == 'Encendido' %}{{ reg['salida_suavizador'] or '-' }}{% else %}-{% endif %}</td> {% endfor %}</tr>
+
+
+                    
+                    <!-- OBSERVACIONES (Opcional, puede amontonarse, pero lo agregamos por si acaso) -->
+                    <tr class="table-warning"><td colspan="{{ registros|length + 1 }}" class="text-start fw-bold sticky-col">Observaciones</td></tr>
+                    <tr><td class="text-start bg-light sticky-col">Nota:</td>
+                        {% for reg in registros %} 
+                            <td style="max-width: 200px; font-size: 0.75rem; white-space: normal; text-align: left;">
+                                {{ reg['observaciones'] or '-' }}
+                            </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modalidad de Impresión -->
+<style>
+.sticky-col {
+    position: sticky;
+    left: 0;
+    border-right: 2px solid #dee2e6 !important;
+}
+@media print {
+    @page { size: landscape; margin: 10mm; }
+    body { padding: 0 !important; margin: 0 !important; background-color: white !important; }
+    nav, header, footer, .sidebar, .btn, form, a.btn, a { display: none !important; }
+    .container, .container-fluid { width: 100% !important; max-width: none !important; padding: 0 !important; margin: 0 !important; }
+    h2 { font-size: 1.2rem !important; margin-bottom: 10px !important; text-align: center; color: black !important; }
+    .card-header { font-size: 1rem !important; padding: 5px !important; background-color: white !important; color: black !important; border-bottom: 2px solid black !important; }
+    .card { border: none !important; box-shadow: none !important; margin: 0 !important; }
+    .table-responsive { max-height: none !important; overflow: visible !important; }
+    .sticky-col { position: static !important; border-right: none !important; }
+    table { page-break-inside: auto; font-size: 0.70rem !important; width: 100% !important; color: black !important; border-collapse: collapse !important; }
+    tr { page-break-inside: avoid; page-break-after: auto; }
+    thead { display: table-header-group; }
+    .table-dark, .table-secondary, .table-light, .bg-light, .bg-dark { background-color: transparent !important; color: #000 !important; }
+    th, td { border: 1px solid #000 !important; padding: 4px !important; }
+    .badge { border: 1px solid #000; color: #000 !important; background-color: transparent !important; }
+    .text-primary, .text-danger, .text-success, .text-warning, .text-info { color: black !important; }
+}
+</style>
+{% endblock %}

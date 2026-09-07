@@ -1,0 +1,194 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0 fw-bold">Nuevo Registro: Check List Área de Filtros y Nave</h4>
+    </div>
+    <div class="card-body">
+        <form action="{{ url_for('nuevo_filtros_nave') }}" method="POST">
+
+            <!-- DATOS GENERALES -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Fecha</label>
+                    <input type="date" class="form-control" name="fecha" value="{{ hoy }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Planta</label>
+                    {% if current_user.username == 'PRODPlanta_A' %}
+                        <input type="text" class="form-control bg-light" value="Planta_A" disabled>
+                        <input type="hidden" name="planta" value="Planta_A">
+                    {% elif current_user.username == 'PRODELEC' %}
+                        <input type="text" class="form-control bg-light" value="Planta_B" disabled>
+                        <input type="hidden" name="planta" value="Planta_B">
+                    {% else %}
+                        <select name="planta" class="form-select" required>
+                            <option value="">Selecciona la planta...</option>
+                            <option value="Planta_B">Planta_B</option>
+                            <option value="Planta_A">Planta_A</option>
+                        </select>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- TABLA DE CHECKLIST -->
+            <div class="table-responsive mb-4">
+                <table class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr class="text-center">
+                            <th>Categoría</th>
+                            <th>Puntos a Inspeccionar</th>
+                            <th>Cumple</th>
+                            <th>No Cumple</th>
+                            <th>Observaciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Limpieza -->
+                        <tr>
+                            <td class="fw-bold" rowspan="3">Limpieza</td>
+                            <td>Limpieza general del área de filtros y nave (piso, cristales)</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_general_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_general_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm" name="limpieza_general_obs">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Limpieza profunda de cubículos (no alimentos, no desechos en botes de basura)</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_profunda_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_profunda_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm" name="limpieza_profunda_obs">
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><i>Otro punto de limpieza</i></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_otros_cumple" value="1"></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="limpieza_otros_cumple" value="0"></td>
+                            <td><input type="text" class="form-control form-control-sm" name="limpieza_otros_obs"></td>
+                        </tr>
+
+                        <!-- Material Prueba -->
+                        <tr>
+                            <td class="fw-bold">Material Prueba<br>(Reactivos)</td>
+                            <td>Verificar la lista de material nombres y colocado en el sitio con etiquetado</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="material_prueba_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="material_prueba_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm" name="material_prueba_obs"></td>
+                        </tr>
+
+                        <!-- Infraestructura -->
+                        <tr>
+                            <td class="fw-bold" rowspan="2">Infraestructura</td>
+                            <td>Estado del pintado de áreas (paredes/pisos, filtros, infraestructura)</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="infraestructura_pintado_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="infraestructura_pintado_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm"
+                                    name="infraestructura_pintado_obs"></td>
+                        </tr>
+                        <tr>
+                            <td>Estado de tuberías y conexiones (no fugas)</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="infraestructura_tuberias_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="infraestructura_tuberias_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm"
+                                    name="infraestructura_tuberias_obs"></td>
+                        </tr>
+
+                        <!-- Mantenimiento -->
+                        <tr>
+                            <td class="fw-bold" rowspan="2">Mantenimiento</td>
+                            <td>Calcas de mantemiento de las areas fechas anterior y fecha aprox de cada equipo</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="mantenimiento_calcas_area_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="mantenimiento_calcas_area_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm"
+                                    name="mantenimiento_calcas_area_obs"></td>
+                        </tr>
+                        <tr>
+                            <td>Calcas de mantenimiento de lavadora fechas</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="mantenimiento_calcas_lavadora_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="mantenimiento_calcas_lavadora_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm"
+                                    name="mantenimiento_calcas_lavadora_obs"></td>
+                        </tr>
+
+                        <!-- Documentacion -->
+                        <tr>
+                            <td class="fw-bold" rowspan="2">Documentación</td>
+                            <td>Bitácoras de producción archivadas correctamente</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="documentacion_archivos_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="documentacion_archivos_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm"
+                                    name="documentacion_archivos_obs"></td>
+                        </tr>
+                        <tr>
+                            <td>Bitácoras firmadas y con fechas actualizadas</td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="documentacion_firmas_cumple" value="1" required></td>
+                            <td class="text-center"><input class="form-check-input" type="radio"
+                                    name="documentacion_firmas_cumple" value="0" required></td>
+                            <td><input type="text" class="form-control form-control-sm" name="documentacion_firmas_obs">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- FIRMAS -->
+            <div class="row pt-3">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold fade-text text-muted">Persona que ejecuta</label>
+                    <input type="text" class="form-control border-bottom-only" name="firma_ejecuta"
+                        placeholder="Nombre completo">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label fw-bold fade-text text-muted">Responsable</label>
+                    <input type="text" class="form-control border-bottom-only" name="firma_responsable"
+                        placeholder="Nombre completo">
+                </div>
+            </div>
+
+            <div class="text-end mt-4">
+                <a href="{{ url_for('filtros_nave_index') }}" class="btn btn-secondary me-2">Cancelar</a>
+                <button type="submit" class="btn btn-success fw-bold">
+                    <i class="bi bi-save"></i> Guardar Registro
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<style>
+    input.border-bottom-only {
+        border-top: none;
+        border-left: none;
+        border-right: none;
+        border-radius: 0;
+        border-bottom: 2px solid #ccc;
+    }
+
+    input.border-bottom-only:focus {
+        outline: none;
+        box-shadow: none;
+        border-color: #198754;
+    }
+</style>
+{% endblock %}

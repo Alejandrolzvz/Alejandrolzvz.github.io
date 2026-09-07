@@ -1,0 +1,149 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Detalle Registro #{{ registro['id'] }} (Filtros y Nave)</h2>
+    <a href="{{ url_for('filtros_nave_index') }}" class="btn btn-secondary">
+        &larr; Volver al Inicio
+    </a>
+</div>
+
+<!-- DATOS GENERALES -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-success text-white fw-bold">
+        Datos de Identificación
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4 mb-2"><strong>Fecha:</strong><br>{{ registro['fecha'] }}</div>
+            <div class="col-md-4 mb-2"><strong>Elabora:</strong><br>{{ registro['firma_ejecuta'] or '-' }}</div>
+            <div class="col-md-4 mb-2"><strong>Responsable:</strong><br>{{ registro['firma_responsable'] or '-' }}</div>
+        </div>
+    </div>
+</div>
+
+<!-- TABLA DE CHECKLIST -->
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-dark text-white fw-bold">
+        Resultados de Inspección
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr class="text-center">
+                        <th>Categoría</th>
+                        <th>Puntos a Inspeccionar</th>
+                        <th>Estado</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Limpieza -->
+                    <tr>
+                        <td class="fw-bold" rowspan="3" style="vertical-align: middle;">Limpieza</td>
+                        <td>Limpieza general del área de filtros y nave (piso, cristales)</td>
+                        <td
+                            class="text-center fw-bold {% if registro['limpieza_general_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['limpieza_general_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['limpieza_general_obs'] or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Limpieza profunda de cubículos (no alimentos, no desechos en botes de basura)</td>
+                        <td
+                            class="text-center fw-bold {% if registro['limpieza_profunda_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['limpieza_profunda_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['limpieza_profunda_obs'] or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td><i>Otros</i></td>
+                        <td
+                            class="text-center fw-bold {% if registro['limpieza_otros_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['limpieza_otros_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['limpieza_otros_obs'] or '-' }}</td>
+                    </tr>
+
+                    <!-- Material Prueba -->
+                    <tr>
+                        <td class="fw-bold" style="vertical-align: middle;">Material Prueba<br>(Reactivos)</td>
+                        <td>Verificar la lista de material nombres y colocado en el sitio con etiquetado</td>
+                        <td
+                            class="text-center fw-bold {% if registro['material_prueba_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['material_prueba_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['material_prueba_obs'] or '-' }}</td>
+                    </tr>
+
+                    <!-- Infraestructura -->
+                    <tr>
+                        <td class="fw-bold" rowspan="2" style="vertical-align: middle;">Infraestructura</td>
+                        <td>Estado del pintado de áreas (paredes/pisos, filtros, infraestructura)</td>
+                        <td
+                            class="text-center fw-bold {% if registro['infraestructura_pintado_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['infraestructura_pintado_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['infraestructura_pintado_obs'] or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Estado de tuberías y conexiones (no fugas)</td>
+                        <td
+                            class="text-center fw-bold {% if registro['infraestructura_tuberias_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['infraestructura_tuberias_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif
+                            %}
+                        </td>
+                        <td>{{ registro['infraestructura_tuberias_obs'] or '-' }}</td>
+                    </tr>
+
+                    <!-- Mantenimiento -->
+                    <tr>
+                        <td class="fw-bold" rowspan="2" style="vertical-align: middle;">Mantenimiento</td>
+                        <td>Calcas de mantemiento de las areas fechas anterior y fecha aprox de cada equipo</td>
+                        <td
+                            class="text-center fw-bold {% if registro['mantenimiento_calcas_area_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['mantenimiento_calcas_area_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif
+                            %}
+                        </td>
+                        <td>{{ registro['mantenimiento_calcas_area_obs'] or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Calcas de mantenimiento de lavadora fechas</td>
+                        <td
+                            class="text-center fw-bold {% if registro['mantenimiento_calcas_lavadora_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['mantenimiento_calcas_lavadora_cumple'] == 1 %}Cumple{% else %}No Cumple{%
+                            endif %}
+                        </td>
+                        <td>{{ registro['mantenimiento_calcas_lavadora_obs'] or '-' }}</td>
+                    </tr>
+
+                    <!-- Documentacion -->
+                    <tr>
+                        <td class="fw-bold" rowspan="2" style="vertical-align: middle;">Documentación</td>
+                        <td>Bitácoras de producción archivadas correctamente</td>
+                        <td
+                            class="text-center fw-bold {% if registro['documentacion_archivos_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['documentacion_archivos_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['documentacion_archivos_obs'] or '-' }}</td>
+                    </tr>
+                    <tr>
+                        <td>Bitácoras firmadas y con fechas actualizadas</td>
+                        <td
+                            class="text-center fw-bold {% if registro['documentacion_firmas_cumple'] == 1 %}text-success{% else %}text-danger{% endif %}">
+                            {% if registro['documentacion_firmas_cumple'] == 1 %}Cumple{% else %}No Cumple{% endif %}
+                        </td>
+                        <td>{{ registro['documentacion_firmas_obs'] or '-' }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="card-footer text-muted text-end" style="font-size: 0.85rem;">
+    Registrado el: {{ registro['created_at'] }}
+</div>
+
+{% endblock %}

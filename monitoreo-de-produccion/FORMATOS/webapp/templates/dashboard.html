@@ -1,0 +1,248 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard de Ósmosis Inversa
+        <small class="fs-6 text-muted fw-normal">{{ fecha_inicio }} al {{ fecha_fin }}</small>
+    </h2>
+    <div class="d-flex align-items-center gap-2">
+        <form class="d-flex align-items-center gap-2" method="GET" action="{{ url_for('dashboard') }}">
+            <label class="fw-bold text-muted mb-0">De:</label>
+            <input type="date" name="fecha_inicio" class="form-control border-primary shadow-sm" value="{{ fecha_inicio }}" style="width:150px;">
+            <label class="fw-bold text-muted mb-0">A:</label>
+            <input type="date" name="fecha_fin" class="form-control border-primary shadow-sm" value="{{ fecha_fin }}" style="width:150px;">
+            <button type="submit" class="btn btn-primary shadow-sm">Consultar</button>
+            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary shadow-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('osmosis_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<!-- TARJETAS DE INDICADORES (KPIs) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-primary text-white bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Horas Efectivas</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_horas }}</h2>
+                <small class="mt-2 text-white-50"><i class="bi bi-gear-wide-connected"></i> Producción bajo On</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-success text-white bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">% de Recuperación</h6>
+                <h2 class="display-5 fw-bold mb-0">{{ kpi_recuperacion }}%</h2>
+                <small class="mt-2 text-white-50">Tasa Diaria Promedio</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-info text-dark bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Rechazo de Sales</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_rechazo }}%</h2>
+                <small class="mt-2 text-dark-50">Desempeño Membranas (S.T.D.)</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card h-100 shadow border-0 rounded-4 bg-warning text-dark bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">ΔP Promedio</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_deltap }} <small class="fs-6">Psi</small></h2>
+                <small class="mt-2 text-dark-50">Diferencial de Presión</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row g-4 mb-5">
+    
+    <!-- Gráfico 1: Rendimiento Hidráulico y Recuperación -->
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-water text-primary"></i> Desempeño Hidráulico</h5>
+                <p class="text-muted small">Volumen de Agua Producida vs Rechazada, con Tasa de Recuperación sobrepuesta</p>
+            </div>
+            <div class="card-body" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="hidraulicoChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico 2: Presión Diferencial (Salud FÍSICA) -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-arrow-down-up text-danger"></i> Caída de Presión (ΔP) en Membranas</h5>
+                <p class="text-muted small">Aumentos drásticos delatan taponamientos o ensuciamiento</p>
+            </div>
+            <div class="card-body" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="caidaPresionChart"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráfico 3: Calidad de Filtrado (Salud QUÍMICA) -->
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-shield-check text-info"></i> Eficiencia: Rechazo de Sales (%)</h5>
+                <p class="text-muted small">Ideal mantener por encima > 95% a lo largo de la producción</p>
+            </div>
+            <div class="card-body" style="position: relative; height: 300px; width: 100%;">
+                <canvas id="rechazoSalesChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Importar Chart.js desde CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inyección de variables con JSON Dumps
+    const labels = {{ chart_labels | safe }};
+    const cRechazo = {{ chart_rechazo | safe }};
+    const cRecup = {{ chart_recuperacion | safe }};
+    const cProd = {{ chart_flujo_prod | safe }};
+    const cFlujoRech = {{ chart_flujo_rechazo | safe }};
+    const cDeltaP = {{ chart_delta_p | safe }};
+
+    const spanGaps = true;
+
+    // === GRÁFICA 1: Rendimiento Hidráulico (Doble Eje Y) ===
+    const ctxHidro = document.getElementById('hidraulicoChart').getContext('2d');
+    new Chart(ctxHidro, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Flujo Producto (GPM)',
+                    data: cProd,
+                    borderColor: 'rgba(54, 162, 235, 1)', // Azul Primario
+                    backgroundColor: 'rgba(54, 162, 235, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    spanGaps: spanGaps,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Flujo Rechazo (GPM)',
+                    data: cFlujoRech,
+                    borderColor: 'rgba(255, 99, 132, 1)', // Rojo
+                    backgroundColor: 'rgba(255, 99, 132, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: true,
+                    spanGaps: spanGaps,
+                    yAxisID: 'y'
+                },
+                {
+                    label: 'Tasa de Recuperación (%)',
+                    data: cRecup,
+                    type: 'line',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 3,
+                    tension: 0.3,
+                    fill: false,
+                    spanGaps: spanGaps,
+                    yAxisID: 'y1'
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: { stacked: false },
+                y: {
+                    stacked: false,
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: { display: true, text: 'Galones / Minuto (GPA)' }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: { display: true, text: 'Porcentaje (%)' },
+                    grid: { drawOnChartArea: false }, // oculta las lineas rojas vs azules
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+
+    // === GRÁFICA 2: Caída de Presión (Delta P) ===
+    const ctxDelta = document.getElementById('caidaPresionChart').getContext('2d');
+    new Chart(ctxDelta, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Delta P (Psi)',
+                data: cDeltaP,
+                borderColor: 'rgba(255, 159, 64, 1)', // Naranja Warning
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                spanGaps: spanGaps,
+                pointBackgroundColor: 'rgba(255, 159, 64, 1)',
+                pointRadius: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { title: { display: true, text: 'Caída de Presión (Psi)' }, beginAtZero: true }
+            }
+        }
+    });
+
+    // === GRÁFICA 3: Rechazo de Sales (%) ===
+    const ctxRechazo = document.getElementById('rechazoSalesChart').getContext('2d');
+    new Chart(ctxRechazo, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '% de Rechazo',
+                data: cRechazo,
+                borderColor: 'rgba(153, 102, 255, 1)', // Purpura
+                backgroundColor: 'rgba(153, 102, 255, 0.1)',
+                borderWidth: 3,
+                tension: 0.2,
+                fill: true,
+                spanGaps: spanGaps,
+                pointBackgroundColor: 'rgba(153, 102, 255, 1)'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: { 
+                    title: { display: true, text: 'Porcentaje de Efectividad (%)' },
+                    min: 0,
+                    max: 100
+                }
+            }
+        }
+    });
+});
+</script>
+
+{% endblock %}

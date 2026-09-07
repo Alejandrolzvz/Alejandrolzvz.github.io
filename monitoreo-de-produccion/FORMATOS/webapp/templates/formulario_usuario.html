@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="d-flex align-items-center mb-4">
+            <a href="{{ url_for('lista_usuarios') }}" class="btn btn-outline-secondary btn-sm me-3" title="Volver">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <h2 class="mb-0">
+                <i class="bi bi-person-{{ 'gear' if usuario else 'plus' }} me-2"></i>
+                {{ 'Editar Usuario' if usuario else 'Nuevo Usuario' }}
+            </h2>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="username" class="form-label fw-bold">Nombre de Usuario</label>
+                        <input type="text" class="form-control" id="username" name="username" 
+                               value="{{ usuario.username if usuario else '' }}" 
+                               placeholder="Ingresa el nombre de usuario" 
+                               {{ 'readonly' if usuario and usuario.id == 1 else '' }}
+                               required>
+                        {% if usuario and usuario.id == 1 %}
+                        <div class="form-text text-info">
+                            <i class="bi bi-info-circle me-1"></i> El nombre del administrador maestro está protegido.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="role_id" class="form-label fw-bold">Rol / Nivel de Acceso</label>
+                        <select class="form-select" id="role_id" name="role_id" 
+                                {{ 'disabled' if usuario and (usuario.id == 1 or usuario.id == current_user.id) else '' }} 
+                                required>
+                            {% for rol in roles %}
+                            <option value="{{ rol.id }}" 
+                                    {{ 'selected' if (usuario and usuario.role_id == rol.id) or (not usuario and rol.name == 'PRODUC') else '' }}>
+                                {{ rol.name }} - {{ rol.description }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        
+                        {% if usuario %}
+                            {% if usuario.id == 1 %}
+                                <div class="form-text text-danger">
+                                    <i class="bi bi-shield-lock-fill me-1"></i> El rol de Administrador Maestro no puede ser modificado.
+                                </div>
+                                <input type="hidden" name="role_id" value="{{ usuario.role_id }}">
+                            {% elif usuario.id == current_user.id %}
+                                <div class="form-text text-warning">
+                                    <i class="bi bi-exclamation-triangle-fill me-1"></i> No puedes cambiar tu propio rol para evitar pérdida de acceso.
+                                </div>
+                                <input type="hidden" name="role_id" value="{{ usuario.role_id }}">
+                            {% endif %}
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="form-label fw-bold">
+                            {{ 'Cambiar Contraseña' if usuario else 'Contraseña' }}
+                        </label>
+                        <input type="password" class="form-control" id="password" name="password" 
+                               placeholder="{{ 'Dejar en blanco para mantener actual' if usuario else 'Ingresa la contraseña' }}"
+                               {{ 'required' if not usuario else '' }}>
+                        {% if usuario %}
+                        <div class="form-text">Solo completa este campo si deseas actualizar la contraseña.</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary py-2">
+                            <i class="bi bi-save me-2"></i> {{ 'Guardar Cambios' if usuario else 'Crear Usuario' }}
+                        </button>
+                        <a href="{{ url_for('lista_usuarios') }}" class="btn btn-link text-muted">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

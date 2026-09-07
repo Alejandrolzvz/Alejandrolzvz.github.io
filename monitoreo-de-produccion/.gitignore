@@ -1,0 +1,31 @@
+# Entornos virtuales y dependencias
+.venv/
+venv/
+ENV/
+env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bases de datos y logs
+*.sqlite3
+*.db
+*.log
+database.db
+
+# Variables de entorno y secretos
+.env
+.env.local
+
+# Docker y Build
+.dockerignore
+build/
+dist/
+*.egg-info/
+
+# Archivos del sistema y de editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

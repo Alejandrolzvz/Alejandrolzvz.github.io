@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generador de Etiquetas con QR</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ink: #1c2321;
+            --paper: #f2efe9;
+            --panel: #ffffff;
+            --line: #dcd6c9;
+            --accent: #c1541f;
+            --accent-soft: #f3ddd0;
+            --accent-ink: #7a2f0e;
+            --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+            --sans: 'Google Sans Flex', 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            --handle: 14px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            font-family: var(--sans);
+            background: var(--paper);
+            color: var(--ink);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        #app {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        /* ---------- Topbar ---------- */
+        .topbar {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            padding: 10px 18px;
+            background: var(--ink);
+            color: #f2efe9;
+            flex-wrap: wrap;
+            border-bottom: 3px solid var(--accent);
+        }
+
+        .brand {
+            font-weight: 700;
+            letter-spacing: .02em;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding-right: 14px;
+            border-right: 1px solid #3a4441;
+        }
+
+        .brand .tag {
+            font-family: var(--mono);
+            font-size: 10px;
+            background: var(--accent);
+            color: #1c2321;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 700;
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .actions .grp {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #2b3330;
+            padding: 5px 8px;
+            border-radius: 6px;
+        }
+
+        .actions label {
+            font-size: 11px;
+            color: #b9c0bb;
+            white-space: nowrap;
+        }
+
+        .actions select,
+        .actions input[type=number] {
+            background: #1c2321;
+            color: #f2efe9;
+            border: 1px solid #3a4441;
+            border-radius: 4px;
+            padding: 5px 6px;
+            font-size: 12px;
+            font-family: var(--mono);
+        }
+
+        .actions input[type=number] {
+            width: 52px;
+        }
+
+        button {
+            font-family: var(--sans);
+            font-size: 12.5px;
+            font-weight: 600;
+            border: 1px solid #3a4441;
+            background: #2b3330;
+            color: #f2efe9;
+            padding: 7px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background .12s ease, transform .05s ease;
+        }
+
+        button:hover {
+            background: #3a4441;
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        button.primary {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        button.primary:hover {
+            background: #a8461a;
+        }
+
+        button.ghost {
+            background: transparent;
+        }
+
+        button:disabled {
+            opacity: .4;
+            cursor: not-allowed;
+        }
+
+        button.small {
+            padding: 4px 8px;
+            font-size: 11px;
+        }
+
+        button.danger {
+            background: transparent;
+            border-color: #8a3a2a;
+            color: #e07b5a;
+        }
+
+        button.danger:hover {
+            background: #3a201a;
+        }
+
+        /* ---------- Workspace ---------- */
+        .workspace {
+            flex: 1;
+            display: flex;
+            min-height: 0;
+        }
+
+        .panel {
+            width: 280px;
+            flex: 0 0 280px;
+            background: var(--panel);
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            border-color: var(--line);
+        }
+
+        .panel.left {
+            border-right: 1px solid var(--line);
+        }
+
+        .panel.right {
+            border-left: 1px solid var(--line);
+        }
+
+        .panel h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .08em;
+            color: #8a8578;
+            margin: 0;
+            padding: 14px 16px 8px;
+        }
+
+        .hint {
+            font-size: 12px;
+            color: #9a9689;
+            padding: 0 16px;
+            line-height: 1.5;
+        }
+
+        section {
+            padding-bottom: 8px;
+        }
+
+        .columns-section,
+        .rows-section {
+            border-bottom: 1px solid var(--line);
+        }
+
+        #columnsList {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 6px 16px 12px;
+        }
+
+        .col-chip {
+            font-family: var(--mono);
+            font-size: 11.5px;
+            background: var(--accent-soft);
+            color: var(--accent-ink);
+            border: 1px solid #e6c3a9;
+            border-radius: 5px;
+            padding: 5px 8px;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .col-chip:active {
+            cursor: grabbing;
+        }
+
+        .rows-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 16px 8px;
+        }
+
+        #selectedCount {
+            font-size: 11px;
+            color: #8a8578;
+            margin-left: auto;
+        }
+
+        #rowsTable {
+            padding: 0 8px 14px;
+            max-height: 340px;
+            overflow-y: auto;
+        }
+
+        .row-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
+        .row-item:hover {
+            background: #f6f3ed;
+        }
+
+        .row-item input {
+            margin-top: 3px;
+        }
+
+        .row-item .rlabel {
+            color: #4a463d;
+            line-height: 1.4;
+            cursor: pointer;
+        }
+
+        .row-item .rlabel b {
+            color: var(--ink);
+        }
+
+        /* ---------- Canvas ---------- */
+        .canvas-area {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 30px;
+            background:
+                linear-gradient(90deg, rgba(0, 0, 0, .035) 1px, transparent 1px) 0 0/16px 16px,
+                linear-gradient(rgba(0, 0, 0, .035) 1px, transparent 1px) 0 0/16px 16px,
+                var(--paper);
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            z-index: 5;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 20px;
+            padding: 5px 10px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, .1);
+        }
+
+        .zoom-controls button {
+            padding: 3px 10px;
+            border-radius: 14px;
+            font-size: 14px;
+            line-height: 1.2;
+        }
+
+        #zoomLabel {
+            min-width: 38px;
+            text-align: center;
+            color: #6b6656;
+            font-family: var(--mono);
+            font-size: 11.5px;
+        }
+
+        #canvasWrapper {
+            position: relative;
+        }
+
+        .label-canvas {
+            position: relative;
+            background: #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .08), 0 12px 30px rgba(0, 0, 0, .12);
+            outline: 1px dashed #c9c2b0;
+            overflow: hidden;
+        }
+
+        .canvas-size-tag {
+            position: absolute;
+            top: -24px;
+            left: 0;
+            font-family: var(--mono);
+            font-size: 11px;
+            color: #8a8578;
+        }
+
+        .label-element {
+            position: absolute;
+            border: 1px solid transparent;
+            cursor: move;
+            display: flex;
+            overflow: hidden;
+        }
+
+        .label-element.selected {
+            border: 1.5px solid var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-soft);
+        }
+
+        .label-element .resize-handle {
+            position: absolute;
+            right: -1px;
+            bottom: -1px;
+            width: var(--handle);
+            height: var(--handle);
+            background: var(--accent);
+            border: 2px solid #fff;
+            border-radius: 50%;
+            cursor: nwse-resize;
+            display: none;
+        }
+
+        .label-element.selected .resize-handle {
+            display: block;
+        }
+
+        .el-text {
+            align-items: center;
+            padding: 1px 2px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.15;
+        }
+
+        .el-qr,
+        .el-image {
+            align-items: stretch;
+            justify-content: stretch;
+        }
+
+        .el-qr img,
+        .el-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            pointer-events: none;
+        }
+
+        .el-empty-badge {
+            font-family: var(--mono);
+            font-size: 9px;
+            color: #b3ab98;
+            border: 1px dashed #d8d2c2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* ---------- Properties ---------- */
+        #propsContent {
+            padding: 6px 16px 16px;
+            font-size: 12.5px;
+        }
+
+        .prop-row {
+            margin-bottom: 10px;
+        }
+
+        .prop-row label {
+            display: block;
+            font-size: 11px;
+            color: #8a8578;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+        }
+
+        .prop-row select,
+        .prop-row input[type=text],
+        .prop-row input[type=number],
+        .prop-row textarea {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            font-family: var(--sans);
+            font-size: 12.5px;
+            background: #fbfaf7;
+        }
+
+        .prop-row textarea {
+            resize: vertical;
+            min-height: 50px;
+            font-family: var(--sans);
+        }
+
+        .prop-inline {
+            display: flex;
+            gap: 8px;
+        }
+
+        .prop-inline>* {
+            flex: 1;
+        }
+
+        .checklist {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 140px;
+            overflow-y: auto;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            padding: 6px 8px;
+            background: #fbfaf7;
+        }
+
+        .checklist label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--ink);
+            text-transform: none;
+            letter-spacing: 0;
+        }
+
+        .swatches {
+            display: flex;
+            gap: 6px;
+        }
+
+        .swatch {
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            border: 2px solid #fff;
+            box-shadow: 0 0 0 1px var(--line);
+            cursor: pointer;
+        }
+
+        .swatch.active {
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+
+        .toggle-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .toggle-btns button {
+            flex: 1;
+            padding: 6px;
+            font-size: 12px;
+        }
+
+        .toggle-btns button.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: #fff;
+        }
+
+        #layersList {
+            padding: 4px 10px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .layer-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 8px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .layer-item:hover {
+            background: #f6f3ed;
+        }
+
+        .layer-item.selected {
+            border-color: var(--accent);
+            background: var(--accent-soft);
+        }
+
+        .layer-item .ltype {
+            font-family: var(--mono);
+            font-size: 9px;
+            background: #eee9dd;
+            color: #6b6656;
+            padding: 2px 5px;
+            border-radius: 3px;
+            flex-shrink: 0;
+        }
+
+        .layer-item .lname {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .layer-item .ldel {
+            color: #b3ab98;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            padding: 0 4px;
+        }
+
+        .layer-item .ldel:hover {
+            color: #c1541f;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            text-align: center;
+            color: #9a9689;
+            padding: 40px 20px;
+        }
+
+        .empty-state .big {
+            font-size: 34px;
+        }
+
+        .empty-state b {
+            color: var(--ink);
+        }
+
+        ::-webkit-scrollbar {
+            width: 9px;
+            height: 9px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #d8d2c2;
+            border-radius: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* ---------- Banner de aviso (no bloqueante) ---------- */
+        #banner {
+            position: fixed;
+            top: 14px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-8px);
+            background: var(--ink);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 8px;
+            font-size: 13px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .28);
+            z-index: 9999;
+            opacity: 0;
+            pointer-events: none;
+            max-width: 520px;
+            text-align: center;
+            transition: opacity .15s ease, transform .15s ease;
+        }
+
+        #banner.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #banner.error {
+            background: #7a2f0e;
+        }
+
+        /* ---------- Grupo de plantillas ---------- */
+        .actions input[type=text] {
+            background: #1c2321;
+            color: #f2efe9;
+            border: 1px solid #3a4441;
+            border-radius: 4px;
+            padding: 5px 8px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div class="topbar">
+            <div class="brand">Etiquetas<span class="tag">QR</span></div>
+            <div class="actions">
+                <div class="grp">
+                    <button id="btnLoadExcel">📄 Cargar Excel</button>
+                    <input type="file" id="excelInput" accept=".xlsx,.xls,.csv" hidden>
+                    <select id="sheetSelect" style="display:none;"></select>
+                </div>
+                <div class="grp">
+                    <label>Tamaño</label>
+                    <select id="presetSize">
+                        <option value="custom">Personalizado</option>
+                        <option value="51x25" selected>51 × 25 mm</option>
+                        <option value="50x30">50 × 30 mm</option>
+                        <option value="70x40">70 × 40 mm</option>
+                        <option value="100x50">100 × 50 mm</option>
+                        <option value="100x150">100 × 150 mm</option>
+                    </select>
+                    <input type="number" id="labelW" value="51" min="10" max="300"> ×
+                    <input type="number" id="labelH" value="25" min="10" max="300"> mm
+                </div>
+                <div class="grp">
+                    <button id="btnAddText">+ Texto</button>
+                    <button id="btnAddQR">+ QR</button>
+                    <button id="btnAddImage">+ Imagen</button>
+                    <input type="file" id="imageInput" accept="image/*" hidden>
+                </div>
+                <div class="grp"
+                    title="Funciona siempre, en cualquier navegador: descarga o carga un archivo .json con el diseño">
+                    <label>Archivo</label>
+                    <button id="btnExportTemplate" class="small">⬇ Exportar plantilla</button>
+                    <button id="btnImportTemplate" class="small">⬆ Importar plantilla</button>
+                    <input type="file" id="importTemplateInput" accept="application/json,.json" hidden>
+                </div>
+            </div>
+            <div style="margin-left:auto; display:flex; gap:8px;">
+                <button id="btnPrint" class="primary">🖨 Imprimir etiquetas</button>
+            </div>
+        </div>
+        <div class="workspace">
+            <aside class="panel left">
+                <section class="columns-section">
+                    <h3>Columnas del Excel</h3>
+                    <div id="columnsList">
+                        <p class="hint">Carga un Excel para ver sus columnas aquí. Luego arrastra una columna al lienzo.
+                        </p>
+                    </div>
+                </section>
+                <section class="rows-section">
+                    <h3>Filas a imprimir</h3>
+                    <div style="padding:0 16px 8px;">
+                        <input type="text" id="rowSearch" placeholder="Buscar fila…"
+                            style="width:100%; padding:6px 8px; border:1px solid var(--line); border-radius:5px; font-size:12.5px; background:#fbfaf7;">
+                    </div>
+                    <div class="rows-toolbar">
+                        <button class="small" id="selectAll">Todas</button>
+                        <button class="small" id="selectNone">Ninguna</button>
+                        <span id="selectedCount"></span>
+                    </div>
+                    <div id="rowsTable">
+                        <p class="hint">Aún no hay datos cargados.</p>
+                    </div>
+                </section>
+            </aside>
+            <section class="canvas-area">
+                <div class="zoom-controls">
+                    <button id="zoomOut" class="small" title="Alejar">−</button>
+                    <span id="zoomLabel">100%</span>
+                    <button id="zoomIn" class="small" title="Acercar">+</button>
+                    <button id="zoomReset" class="small"
+                        title="Restablecer zoom (Ctrl + rueda del ratón también funciona)">Ajustar</button>
+                </div>
+                <div id="canvasWrapper">
+                    <div id="canvasSizeTag" class="canvas-size-tag">51 × 25 mm</div>
+                    <div id="labelCanvas" class="label-canvas"></div>
+                </div>
+            </section>
+            <aside class="panel right">
+                <h3>Propiedades</h3>
+                <div id="propsContent">
+                    <p class="hint">Selecciona un elemento del lienzo para editarlo.</p>
+                </div>
+                <h3>Elementos de la etiqueta</h3>
+                <div id="layersList">
+                    <p class="hint" style="padding-left:6px;">Sin elementos aún.</p>
+                </div>
+            </aside>
+        </div>
+    </div>
+    <script>
+        (function () {
+            "use strict";
+            /* ============================ ESTADO ============================ */
+            const state = {
+                columns: [],          // ["Nombre","Codigo",...]
+                rows: [],             // [{Nombre:"...", Codigo:"...", __selected:true}, ...]
+                labelW: 51, labelH: 25, // mm
+                elements: [],          // {id,type,x,y,w,h,...}
+                selectedId: null,
+                previewRowIdx: 0,
+                nextId: 1
+            };
+            const MM2PX_REF = 3.7795; // fallback; usamos medición real cuando es posible
+            /* ============================ DOM refs ============================ */
+            const $ = (sel) => document.querySelector(sel);
+            const excelInput = $("#excelInput");
+            const sheetSelect = $("#sheetSelect");
+            const columnsList = $("#columnsList");
+            const rowsTable = $("#rowsTable");
+            const selectedCount = $("#selectedCount");
+            const labelCanvas = $("#labelCanvas");
+            const canvasWrapper = $("#canvasWrapper");
+            const canvasSizeTag = $("#canvasSizeTag");
+            const zoomLabel = $("#zoomLabel");
+            const propsContent = $("#propsContent");
+            const layersList = $("#layersList");
+            const labelWInput = $("#labelW");
+            const labelHInput = $("#labelH");
+            const presetSize = $("#presetSize");
+            const imageInput = $("#imageInput");
+            const rowSearch = $("#rowSearch");
+            const importTemplateInput = $("#importTemplateInput");
+            let workbookCache = null;
+            let rowFilterText = "";
+            let zoom = 1;
+            const ZOOM_MIN = 0.4, ZOOM_MAX = 4, ZOOM_STEP = 0.15;
+            /* ============================ UTILIDADES ============================ */
+            function uid() { return "el" + (state.nextId++); }
+            let bannerTimeout = null;
+            function showBanner(msg, isError) {
+                let b = document.getElementById("banner");
+                if (!b) {
+                    b = document.createElement("div");
+                    b.id = "banner";
+                    document.body.appendChild(b);
+                }
+                b.textContent = msg;
+                b.className = "show" + (isError ? " error" : "");
+                clearTimeout(bannerTimeout);
+                bannerTimeout = setTimeout(() => b.classList.remove("show"), 4200);
+            }
+            function pxPerMm() {
+                const rect = labelCanvas.getBoundingClientRect();
+                return rect.width / state.labelW;
+            }
+            function currentPreviewRow() {
+                return state.rows[state.previewRowIdx] || state.rows.find(r => r.__selected) || null;
+            }
+            function selectedRows() {
+                return state.rows.filter(r => r.__selected);
+            }
+            function el(id) { return state.elements.find(e => e.id === id); }
+            /* ============================ ZOOM DEL LIENZO ============================ */
+            function applyZoom() {
+                labelCanvas.style.transform = `scale(${zoom})`;
+                labelCanvas.style.transformOrigin = "top left";
+                canvasWrapper.style.width = (state.labelW * MM2PX_REF * zoom) + "px";
+                canvasWrapper.style.height = (state.labelH * MM2PX_REF * zoom) + "px";
+                zoomLabel.textContent = Math.round(zoom * 100) + "%";
+            }
+            $("#zoomIn").addEventListener("click", () => { zoom = Math.min(ZOOM_MAX, zoom + ZOOM_STEP); applyZoom(); });
+            $("#zoomOut").addEventListener("click", () => { zoom = Math.max(ZOOM_MIN, zoom - ZOOM_STEP); applyZoom(); });
+            $("#zoomReset").addEventListener("click", () => { zoom = 1; applyZoom(); });
+            document.querySelector(".canvas-area").addEventListener("wheel", (e) => {
+                if (!(e.ctrlKey || e.metaKey)) return;
+                e.preventDefault();
+                zoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, zoom + (e.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP)));
+                applyZoom();
+            }, { passive: false });
+            /* ============================ AJUSTAR ELEMENTOS AL TAMAÑO DE ETIQUETA ============================ */
+            function clampElementBounds(e) {
+                e.w = Math.max(4, Math.min(e.w, state.labelW));
+                e.h = Math.max(4, Math.min(e.h, state.labelH));
+                e.x = Math.max(0, Math.min(e.x, state.labelW - e.w));
+                e.y = Math.max(0, Math.min(e.y, state.labelH - e.h));
+            }
+            function reflowAllElements() {
+                state.elements.forEach(clampElementBounds);
+            }
+            /* ============================ CARGA DE EXCEL ============================ */
+            $("#btnLoadExcel").addEventListener("click", () => excelInput.click());
+            excelInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function (evt) {
+                    try {
+                        const data = new Uint8Array(evt.target.result);
+                        const wb = XLSX.read(data, { type: "array" });
+                        workbookCache = wb;
+                        if (wb.SheetNames.length > 1) {
+                            sheetSelect.style.display = "inline-block";
+                            sheetSelect.innerHTML = wb.SheetNames.map(n => `<option value="${n}">${n}</option>`).join("");
+                            sheetSelect.onchange = () => loadSheet(wb, sheetSelect.value);
+                        } else {
+                            sheetSelect.style.display = "none";
+                        }
+                        loadSheet(wb, wb.SheetNames[0]);
+                    } catch (err) {
+                        showBanner("No se pudo leer el archivo. Verifica que sea un Excel (.xlsx/.xls) o CSV válido. " + err.message, true);
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+                excelInput.value = "";
+            });
+            function loadSheet(wb, sheetName) {
+                const ws = wb.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(ws, { defval: "" });
+                if (json.length === 0) {
+                    showBanner("La hoja seleccionada no tiene datos.", true);
+                    return;
+                }
+                state.columns = Object.keys(json[0]);
+                state.rows = json.map(r => Object.assign({}, r, { __selected: true }));
+                state.previewRowIdx = 0;
+                renderColumns();
+                renderRows();
+                renderCanvas();
+            }
+            /* ============================ PANEL: COLUMNAS ============================ */
+            function renderColumns() {
+                if (state.columns.length === 0) {
+                    columnsList.innerHTML = '<p class="hint">Carga un Excel para ver sus columnas aquí.</p>';
+                    return;
+                }
+                columnsList.innerHTML = "";
+                state.columns.forEach(col => {
+                    const chip = document.createElement("div");
+                    chip.className = "col-chip";
+                    chip.textContent = col;
+                    chip.draggable = true;
+                    chip.title = "Arrastra al lienzo para agregar como texto";
+                    chip.addEventListener("dragstart", (e) => {
+                        e.dataTransfer.setData("text/plain", col);
+                    });
+                    chip.addEventListener("click", () => addTextElement(col));
+                    columnsList.appendChild(chip);
+                });
+            }
+            /* ============================ PANEL: FILAS ============================ */
+            function rowMatchesFilter(row) {
+                if (!rowFilterText) return true;
+                return state.columns.some(c => String(row[c] ?? "").toLowerCase().includes(rowFilterText));
+            }
+            function renderRows() {
+                if (state.rows.length === 0) {
+                    rowsTable.innerHTML = '<p class="hint">Aún no hay datos cargados.</p>';
+                    selectedCount.textContent = "";
+                    return;
+                }
+                rowsTable.innerHTML = "";
+                const previewCols = state.columns.slice(0, 2);
+                let visibleCount = 0;
+                state.rows.forEach((row, idx) => {
+                    if (!rowMatchesFilter(row)) return;
+                    visibleCount++;
+                    const item = document.createElement("div");
+                    item.className = "row-item";
+                    const label = previewCols.map(c => row[c]).filter(v => v !== "").join(" — ") || "(fila vacía)";
+                    item.innerHTML = `
+        <input type="checkbox" ${row.__selected ? "checked" : ""} data-idx="${idx}">
+        <span class="rlabel"><b>#${idx + 1}</b> ${escapeHtml(String(label))}</span>
+      `;
+                    const checkbox = item.querySelector("input");
+                    checkbox.addEventListener("change", () => {
+                        row.__selected = checkbox.checked;
+                        updateSelectedCount();
+                    });
+                    item.querySelector(".rlabel").addEventListener("click", () => {
+                        state.previewRowIdx = idx;
+                        renderCanvas();
+                    });
+                    rowsTable.appendChild(item);
+                });
+                if (visibleCount === 0) {
+                    rowsTable.innerHTML = '<p class="hint">Ninguna fila coincide con la búsqueda.</p>';
+                }
+                updateSelectedCount();
+            }
+            function updateSelectedCount() {
+                const n = selectedRows().length;
+                selectedCount.textContent = `${n} de ${state.rows.length} seleccionadas`;
+            }
+            rowSearch.addEventListener("input", () => {
+                rowFilterText = rowSearch.value.trim().toLowerCase();
+                renderRows();
+            });
+            $("#selectAll").addEventListener("click", () => {
+                state.rows.forEach(r => { if (rowMatchesFilter(r)) r.__selected = true; });
+                renderRows();
+            });
+            $("#selectNone").addEventListener("click", () => {
+                state.rows.forEach(r => { if (rowMatchesFilter(r)) r.__selected = false; });
+                renderRows();
+            });
+            function escapeHtml(s) {
+                return s.replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+            }
+            /* ============================ TAMAÑO DE ETIQUETA ============================ */
+            const presets = { "51x25": [51, 25], "50x30": [50, 30], "70x40": [70, 40], "100x50": [100, 50], "100x150": [100, 150] };
+            function matchPreset(w, h) {
+                for (const key in presets) {
+                    if (presets[key][0] === w && presets[key][1] === h) return key;
+                }
+                return "custom";
+            }
+            presetSize.addEventListener("change", () => {
+                const v = presetSize.value;
+                if (presets[v]) {
+                    state.labelW = presets[v][0];
+                    state.labelH = presets[v][1];
+                    labelWInput.value = state.labelW;
+                    labelHInput.value = state.labelH;
+                    reflowAllElements();
+                    renderCanvas();
+                }
+            });
+            function onSizeInputChange() {
+                presetSize.value = "custom";
+                state.labelW = Math.max(10, parseFloat(labelWInput.value) || 51);
+                state.labelH = Math.max(10, parseFloat(labelHInput.value) || 25);
+                reflowAllElements();
+                renderCanvas();
+            }
+            labelWInput.addEventListener("input", onSizeInputChange);
+            labelHInput.addEventListener("input", onSizeInputChange);
+            /* ============================ ELEMENTOS ============================ */
+            function addTextElement(column) {
+                const w = Math.min(state.labelW - 8, 40);
+                const h = Math.min(8, Math.max(4, state.labelH - 8));
+                const rowsFit = Math.max(1, Math.floor((state.labelH - 4) / (h + 2)));
+                const e = {
+                    id: uid(), type: "text",
+                    x: 4, y: 4 + (state.elements.length % rowsFit) * (h + 2), w, h,
+                    fontSize: Math.min(12, Math.max(8, Math.round(h * 2.6))), bold: false, align: "left", color: "#1c2321",
+                    bound: column || null,
+                    staticText: column ? "" : "Texto"
+                };
+                clampElementBounds(e);
+                state.elements.push(e);
+                selectElement(e.id);
+                renderCanvas(); renderLayers();
+            }
+            function addQRElement() {
+                const size = Math.max(6, Math.min(20, state.labelW - 8, state.labelH - 8));
+                const e = {
+                    id: uid(), type: "qr",
+                    x: state.labelW - size - 4, y: 4, w: size, h: size,
+                    qrColumns: state.columns.length ? [state.columns[0]] : [],
+                    separator: " | "
+                };
+                clampElementBounds(e);
+                state.elements.push(e);
+                selectElement(e.id);
+                renderCanvas(); renderLayers();
+            }
+            function addImageElement(dataUrl) {
+                const w = Math.min(16, state.labelW - 8);
+                const h = Math.min(12, state.labelH - 8);
+                const e = {
+                    id: uid(), type: "image",
+                    x: 4, y: state.labelH - h - 4, w, h,
+                    src: dataUrl
+                };
+                clampElementBounds(e);
+                state.elements.push(e);
+                selectElement(e.id);
+                renderCanvas(); renderLayers();
+            }
+            let imageReplaceTarget = null; // si está definido, la próxima imagen cargada reemplaza este elemento en vez de crear uno nuevo
+            $("#btnAddText").addEventListener("click", () => addTextElement(null));
+            $("#btnAddQR").addEventListener("click", () => addQRElement());
+            $("#btnAddImage").addEventListener("click", () => { imageReplaceTarget = null; imageInput.click(); });
+            imageInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    if (imageReplaceTarget) {
+                        imageReplaceTarget.src = evt.target.result;
+                        imageReplaceTarget = null;
+                        renderCanvas();
+                    } else {
+                        addImageElement(evt.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+                imageInput.value = "";
+            });
+            // drop de columnas sobre el lienzo
+            labelCanvas.addEventListener("dragover", (e) => e.preventDefault());
+            labelCanvas.addEventListener("drop", (e) => {
+                e.preventDefault();
+                const col = e.dataTransfer.getData("text/plain");
+                if (!col) return;
+                const rect = labelCanvas.getBoundingClientRect();
+                const ppm = pxPerMm();
+                const w = Math.min(state.labelW - 8, 40);
+                const h = Math.min(8, Math.max(4, state.labelH - 8));
+                const x = (e.clientX - rect.left) / ppm - w / 2;
+                const y = (e.clientY - rect.top) / ppm - h / 2;
+                const elem = {
+                    id: uid(), type: "text",
+                    x: Math.round(x), y: Math.round(y), w, h,
+                    fontSize: Math.min(12, Math.max(8, Math.round(h * 2.6))), bold: false, align: "left", color: "#1c2321",
+                    bound: col, staticText: ""
+                };
+                clampElementBounds(elem);
+                state.elements.push(elem);
+                selectElement(elem.id);
+                renderCanvas(); renderLayers();
+            });
+            /* ============================ RENDER LIENZO ============================ */
+            function renderCanvas() {
+                labelCanvas.style.width = state.labelW + "mm";
+                labelCanvas.style.height = state.labelH + "mm";
+                canvasSizeTag.textContent = `${state.labelW} × ${state.labelH} mm`;
+                applyZoom();
+                labelCanvas.innerHTML = "";
+                const previewRow = currentPreviewRow();
+                state.elements.forEach(elem => {
+                    const node = document.createElement("div");
+                    node.className = "label-element el-" + elem.type + (elem.id === state.selectedId ? " selected" : "");
+                    node.style.left = elem.x + "mm";
+                    node.style.top = elem.y + "mm";
+                    node.style.width = elem.w + "mm";
+                    node.style.height = elem.h + "mm";
+                    node.dataset.id = elem.id;
+                    if (elem.type === "text") {
+                        node.style.fontSize = elem.fontSize + "px";
+                        node.style.fontWeight = elem.bold ? "700" : "400";
+                        node.style.color = elem.color;
+                        node.style.justifyContent = elem.align === "center" ? "center" : (elem.align === "right" ? "flex-end" : "flex-start");
+                        node.style.textAlign = elem.align;
+                        let txt;
+                        if (elem.bound) {
+                            txt = previewRow ? String(previewRow[elem.bound] ?? "") : `{{${elem.bound}}}`;
+                        } else {
+                            txt = elem.staticText || "";
+                        }
+                        node.textContent = txt;
+                    } else if (elem.type === "qr") {
+                        if (elem.qrColumns && elem.qrColumns.length && previewRow) {
+                            const content = elem.qrColumns.map(c => previewRow[c]).join(elem.separator || " | ");
+                            const canvas = document.createElement("canvas");
+                            try {
+                                new QRious({ element: canvas, value: content || " ", size: 256, level: "M" });
+                                const img = document.createElement("img");
+                                img.src = canvas.toDataURL();
+                                node.appendChild(img);
+                            } catch (err) { /* ignore render error */ }
+                        } else {
+                            const badge = document.createElement("div");
+                            badge.className = "el-empty-badge";
+                            badge.textContent = "QR";
+                            node.appendChild(badge);
+                        }
+                    } else if (elem.type === "image") {
+                        if (elem.src) {
+                            const img = document.createElement("img");
+                            img.src = elem.src;
+                            node.appendChild(img);
+                        } else {
+                            const badge = document.createElement("div");
+                            badge.className = "el-empty-badge";
+                            badge.textContent = "Imagen";
+                            node.appendChild(badge);
+                        }
+                    }
+                    const handle = document.createElement("div");
+                    handle.className = "resize-handle";
+                    node.appendChild(handle);
+                    node.addEventListener("mousedown", (ev) => startDrag(ev, elem));
+                    handle.addEventListener("mousedown", (ev) => startResize(ev, elem));
+                    labelCanvas.appendChild(node);
+                });
+            }
+            /* ============================ ARRASTRAR / REDIMENSIONAR ============================ */
+            let dragCtx = null;
+            function startDrag(ev, elem) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                selectElement(elem.id);
+                const ppm = pxPerMm();
+                dragCtx = {
+                    mode: "move", elem, ppm,
+                    startX: ev.clientX, startY: ev.clientY,
+                    origX: elem.x, origY: elem.y
+                };
+                document.addEventListener("mousemove", onDragMove);
+                document.addEventListener("mouseup", onDragEnd);
+            }
+            function startResize(ev, elem) {
+                ev.stopPropagation();
+                ev.preventDefault();
+                selectElement(elem.id);
+                const ppm = pxPerMm();
+                dragCtx = {
+                    mode: "resize", elem, ppm,
+                    startX: ev.clientX, startY: ev.clientY,
+                    origW: elem.w, origH: elem.h
+                };
+                document.addEventListener("mousemove", onDragMove);
+                document.addEventListener("mouseup", onDragEnd);
+            }
+            function onDragMove(ev) {
+                if (!dragCtx) return;
+                const dx = (ev.clientX - dragCtx.startX) / dragCtx.ppm;
+                const dy = (ev.clientY - dragCtx.startY) / dragCtx.ppm;
+                const elem = dragCtx.elem;
+                if (dragCtx.mode === "move") {
+                    elem.x = Math.max(0, Math.min(state.labelW - elem.w, dragCtx.origX + dx));
+                    elem.y = Math.max(0, Math.min(state.labelH - elem.h, dragCtx.origY + dy));
+                } else {
+                    elem.w = Math.max(6, Math.min(state.labelW - elem.x, dragCtx.origW + dx));
+                    elem.h = Math.max(6, Math.min(state.labelH - elem.y, dragCtx.origH + dy));
+                }
+                renderCanvas();
+            }
+            function onDragEnd() {
+                dragCtx = null;
+                document.removeEventListener("mousemove", onDragMove);
+                document.removeEventListener("mouseup", onDragEnd);
+                renderLayers();
+            }
+            labelCanvas.addEventListener("mousedown", (ev) => {
+                if (ev.target === labelCanvas) selectElement(null);
+            });
+            /* ============================ SELECCIÓN Y PROPIEDADES ============================ */
+            function selectElement(id) {
+                state.selectedId = id;
+                renderCanvas();
+                renderProps();
+                renderLayers();
+            }
+            function renderProps() {
+                const elem = el(state.selectedId);
+                if (!elem) {
+                    propsContent.innerHTML = '<p class="hint">Selecciona un elemento del lienzo para editarlo.</p>';
+                    return;
+                }
+                if (elem.type === "text") {
+                    propsContent.innerHTML = `
+        <div class="prop-row">
+          <label>Origen del texto</label>
+          <select id="p-bound">
+            <option value="">Texto fijo</option>
+            ${state.columns.map(c => `<option value="${c}" ${elem.bound === c ? "selected" : ""}>${c}</option>`).join("")}
+          </select>
+        </div>
+        ${!elem.bound ? `<div class="prop-row"><label>Contenido</label><textarea id="p-static">${elem.staticText || ""}</textarea></div>` : ""}
+        <div class="prop-row prop-inline">
+          <div>
+            <label>Tamaño (px)</label>
+            <input type="number" id="p-fontsize" value="${elem.fontSize}" min="6" max="72">
+          </div>
+          <div>
+            <label>Alineación</label>
+            <select id="p-align">
+              <option value="left" ${elem.align === "left" ? "selected" : ""}>Izquierda</option>
+              <option value="center" ${elem.align === "center" ? "selected" : ""}>Centro</option>
+              <option value="right" ${elem.align === "right" ? "selected" : ""}>Derecha</option>
+            </select>
+          </div>
+        </div>
+        <div class="prop-row">
+          <label>Estilo</label>
+          <div class="toggle-btns">
+            <button id="p-bold" class="${elem.bold ? "active" : ""}">Negrita</button>
+          </div>
+        </div>
+        <div class="prop-row">
+          <label>Color</label>
+          <input type="text" id="p-color" value="${elem.color}">
+        </div>
+        <div class="prop-row prop-inline">
+          <div><label>Ancho (mm)</label><input type="number" id="p-w" value="${round1(elem.w)}"></div>
+          <div><label>Alto (mm)</label><input type="number" id="p-h" value="${round1(elem.h)}"></div>
+        </div>
+        <button class="danger" id="p-delete" style="width:100%; margin-top:6px;">Eliminar elemento</button>
+      `;
+                    $("#p-bound").addEventListener("change", (e) => { elem.bound = e.target.value || null; renderCanvas(); renderProps(); renderLayers(); });
+                    const staticEl = document.getElementById("p-static");
+                    if (staticEl) staticEl.addEventListener("input", (e) => { elem.staticText = e.target.value; renderCanvas(); });
+                    $("#p-fontsize").addEventListener("input", (e) => { elem.fontSize = parseInt(e.target.value) || 12; renderCanvas(); });
+                    $("#p-align").addEventListener("change", (e) => { elem.align = e.target.value; renderCanvas(); });
+                    $("#p-bold").addEventListener("click", () => { elem.bold = !elem.bold; renderCanvas(); renderProps(); });
+                    $("#p-color").addEventListener("input", (e) => { elem.color = e.target.value; renderCanvas(); });
+                    $("#p-w").addEventListener("input", (e) => { elem.w = clampNum(e.target.value, 6, state.labelW); renderCanvas(); });
+                    $("#p-h").addEventListener("input", (e) => { elem.h = clampNum(e.target.value, 6, state.labelH); renderCanvas(); });
+                    $("#p-delete").addEventListener("click", () => deleteElement(elem.id));
+                } else if (elem.type === "qr") {
+                    propsContent.innerHTML = `
+        <div class="prop-row">
+          <label>Columnas incluidas en el QR</label>
+          <div class="checklist">
+            ${state.columns.map(c => `
+              <label><input type="checkbox" data-col="${c}" ${elem.qrColumns.includes(c) ? "checked" : ""}> ${c}</label>
+            `).join("") || "<span class='hint'>Carga un Excel primero.</span>"}
+          </div>
+        </div>
+        <div class="prop-row">
+          <label>Separador entre campos</label>
+          <input type="text" id="p-sep" value="${elem.separator}">
+        </div>
+        <div class="prop-row prop-inline">
+          <div><label>Ancho (mm)</label><input type="number" id="p-w" value="${round1(elem.w)}"></div>
+          <div><label>Alto (mm)</label><input type="number" id="p-h" value="${round1(elem.h)}"></div>
+        </div>
+        <button class="danger" id="p-delete" style="width:100%; margin-top:6px;">Eliminar elemento</button>
+      `;
+                    propsContent.querySelectorAll("input[data-col]").forEach(cb => {
+                        cb.addEventListener("change", () => {
+                            const col = cb.dataset.col;
+                            if (cb.checked) { if (!elem.qrColumns.includes(col)) elem.qrColumns.push(col); }
+                            else { elem.qrColumns = elem.qrColumns.filter(c => c !== col); }
+                            renderCanvas();
+                        });
+                    });
+                    $("#p-sep").addEventListener("input", (e) => { elem.separator = e.target.value; renderCanvas(); });
+                    $("#p-w").addEventListener("input", (e) => { elem.w = clampNum(e.target.value, 6, state.labelW); renderCanvas(); });
+                    $("#p-h").addEventListener("input", (e) => { elem.h = clampNum(e.target.value, 6, state.labelH); renderCanvas(); });
+                    $("#p-delete").addEventListener("click", () => deleteElement(elem.id));
+                } else if (elem.type === "image") {
+                    propsContent.innerHTML = `
+        <div class="prop-row">
+          <label>Imagen</label>
+          <button id="p-replace" style="width:100%;">Reemplazar imagen</button>
+        </div>
+        <div class="prop-row prop-inline">
+          <div><label>Ancho (mm)</label><input type="number" id="p-w" value="${round1(elem.w)}"></div>
+          <div><label>Alto (mm)</label><input type="number" id="p-h" value="${round1(elem.h)}"></div>
+        </div>
+        <button class="danger" id="p-delete" style="width:100%; margin-top:6px;">Eliminar elemento</button>
+      `;
+                    $("#p-replace").addEventListener("click", () => {
+                        imageReplaceTarget = elem;
+                        imageInput.click();
+                    });
+                    $("#p-w").addEventListener("input", (e) => { elem.w = clampNum(e.target.value, 6, state.labelW); renderCanvas(); });
+                    $("#p-h").addEventListener("input", (e) => { elem.h = clampNum(e.target.value, 6, state.labelH); renderCanvas(); });
+                    $("#p-delete").addEventListener("click", () => deleteElement(elem.id));
+                }
+            }
+            function round1(n) { return Math.round(n * 10) / 10; }
+            function clampNum(v, min, max) { v = parseFloat(v); if (isNaN(v)) v = min; return Math.max(min, Math.min(max, v)); }
+            function deleteElement(id) {
+                state.elements = state.elements.filter(e => e.id !== id);
+                if (state.selectedId === id) state.selectedId = null;
+                renderCanvas(); renderProps(); renderLayers();
+            }
+            /* ============================ CAPAS ============================ */
+            function renderLayers() {
+                if (state.elements.length === 0) {
+                    layersList.innerHTML = '<p class="hint" style="padding-left:6px;">Sin elementos aún.</p>';
+                    return;
+                }
+                layersList.innerHTML = "";
+                state.elements.forEach(elem => {
+                    const item = document.createElement("div");
+                    item.className = "layer-item" + (elem.id === state.selectedId ? " selected" : "");
+                    const typeLabel = elem.type === "text" ? "TXT" : (elem.type === "qr" ? "QR" : "IMG");
+                    let name;
+                    if (elem.type === "text") name = elem.bound ? elem.bound : (elem.staticText || "Texto fijo");
+                    else if (elem.type === "qr") name = elem.qrColumns.length ? elem.qrColumns.join(" + ") : "Sin columnas";
+                    else name = "Imagen";
+                    item.innerHTML = `<span class="ltype">${typeLabel}</span><span class="lname">${escapeHtml(String(name))}</span><button class="ldel">✕</button>`;
+                    item.addEventListener("click", (e) => {
+                        if (e.target.classList.contains("ldel")) return;
+                        selectElement(elem.id);
+                    });
+                    item.querySelector(".ldel").addEventListener("click", () => deleteElement(elem.id));
+                    layersList.appendChild(item);
+                });
+            }
+            /* ============================ IMPRESIÓN ============================ */
+            $("#btnPrint").addEventListener("click", printLabels);
+            // Genera el HTML de una etiqueta ya rellenada con los datos de "row"
+            function buildLabelHtml(row) {
+                let inner = "";
+                state.elements.forEach(elem => {
+                    const styleBase = `position:absolute; left:${elem.x}mm; top:${elem.y}mm; width:${elem.w}mm; height:${elem.h}mm; display:flex; overflow:hidden;`;
+                    if (elem.type === "text") {
+                        const align = elem.align === "center" ? "center" : (elem.align === "right" ? "flex-end" : "flex-start");
+                        const txt = elem.bound ? String(row[elem.bound] ?? "") : (elem.staticText || "");
+                        const style = styleBase + `font-size:${elem.fontSize}px; font-weight:${elem.bold ? 700 : 400}; color:${elem.color}; align-items:center; justify-content:${align}; text-align:${elem.align}; white-space:pre-wrap; word-break:break-word; line-height:1.15;`;
+                        inner += `<div style="${style}">${escapeHtml(txt)}</div>`;
+                    } else if (elem.type === "qr") {
+                        const content = (elem.qrColumns || []).map(c => row[c]).join(elem.separator || " | ");
+                        let dataUrl = "";
+                        try {
+                            const canvas = document.createElement("canvas");
+                            new QRious({ element: canvas, value: content || " ", size: 256, level: "M" });
+                            dataUrl = canvas.toDataURL();
+                        } catch (err) { }
+                        if (dataUrl) {
+                            inner += `<div style="${styleBase}"><img src="${dataUrl}" style="width:100%;height:100%;object-fit:contain;"></div>`;
+                        }
+                    } else if (elem.type === "image" && elem.src) {
+                        inner += `<div style="${styleBase}"><img src="${elem.src}" style="width:100%;height:100%;object-fit:contain;"></div>`;
+                    }
+                });
+                return `<div class="label-page" style="position:relative; width:${state.labelW}mm; height:${state.labelH}mm; page-break-after:always; break-after:page; page-break-inside:avoid; break-inside:avoid; background:#fff; overflow:hidden;">${inner}</div>`;
+            }
+            function printLabels() {
+                const rows = selectedRows();
+                if (state.rows.length === 0) {
+                    showBanner("Primero carga un archivo de Excel con datos.", true);
+                    return;
+                }
+                if (rows.length === 0) {
+                    showBanner("Selecciona al menos una fila para imprimir.", true);
+                    return;
+                }
+                if (state.elements.length === 0) {
+                    showBanner("Agrega al menos un elemento (texto, QR o imagen) a la etiqueta antes de imprimir.", true);
+                    return;
+                }
+                const labelsHtml = rows.map(buildLabelHtml).join("\n");
+                const doc = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Imprimir Etiquetas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,100..1000&display=swap" rel="stylesheet">
+<style>
+  @page {
+    size: ${state.labelW}mm ${state.labelH}mm;
+    margin: 0;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Google Sans Flex', 'Google Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #fff;
+  }
+  .label-page {
+    position: relative;
+    width: ${state.labelW}mm;
+    height: ${state.labelH}mm;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+    background: #fff;
+    overflow: hidden;
+  }
+</style>
+</head><body>
+${labelsHtml}
+</body></html>`;
+                const win = window.open("", "_blank");
+                if (!win) {
+                    showBanner("El navegador bloqueó la ventana de impresión. Permite ventanas emergentes para este sitio.", true);
+                    return;
+                }
+                win.document.open();
+                win.document.write(doc);
+                win.document.close();
+                function triggerPrint() {
+                    win.focus();
+                    win.print();
+                }
+                const imgs = win.document.querySelectorAll("img");
+                if (imgs.length === 0) {
+                    setTimeout(triggerPrint, 100);
+                } else {
+                    let loaded = 0;
+                    const onImgReady = () => {
+                        loaded++;
+                        if (loaded >= imgs.length) {
+                            setTimeout(triggerPrint, 150);
+                        }
+                    };
+                    imgs.forEach(img => {
+                        if (img.complete && img.naturalWidth > 0) {
+                            onImgReady();
+                        } else {
+                            img.onload = onImgReady;
+                            img.onerror = onImgReady;
+                        }
+                    });
+                }
+            }
+            /* ============================ PLANTILLAS ============================ */
+            function applyTemplateData(t) {
+                state.labelW = t.labelW;
+                state.labelH = t.labelH;
+                labelWInput.value = t.labelW;
+                labelHInput.value = t.labelH;
+                presetSize.value = matchPreset(t.labelW, t.labelH);
+                state.elements = JSON.parse(JSON.stringify(t.elements));
+                state.elements.forEach(e => {
+                    const n = parseInt(String(e.id).replace("el", ""));
+                    if (!isNaN(n) && n >= state.nextId) state.nextId = n + 1;
+                });
+                reflowAllElements();
+                state.selectedId = null;
+                renderCanvas(); renderProps(); renderLayers();
+            }
+            /* ---- Exportar / importar como archivo .json (funciona en cualquier navegador) ---- */
+            function sanitizeFilename(s) {
+                return (s || "").replace(/[^a-z0-9\-_ ]/gi, "").trim().replace(/\s+/g, "-") || "plantilla";
+            }
+            function exportTemplateFile() {
+                if (state.elements.length === 0) {
+                    showBanner("No hay elementos en el lienzo para exportar.", true);
+                    return;
+                }
+                const name = "plantilla-etiqueta";
+                const data = { name, labelW: state.labelW, labelH: state.labelH, elements: state.elements };
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = sanitizeFilename(name) + ".json";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showBanner(`Plantilla descargada como "${a.download}". Guárdala donde quieras: para volver a usarla, pulsa "Importar plantilla".`, false);
+            }
+            function importTemplateFile() {
+                importTemplateInput.click();
+            }
+            importTemplateInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (evt) => {
+                    try {
+                        const data = JSON.parse(evt.target.result);
+                        if (!data || !Array.isArray(data.elements) || typeof data.labelW !== "number" || typeof data.labelH !== "number") {
+                            throw new Error("Formato inválido");
+                        }
+                        applyTemplateData(data);
+                        showBanner(`Plantilla "${data.name || file.name}" importada desde archivo.`, false);
+                    } catch (err) {
+                        showBanner("El archivo seleccionado no es una plantilla válida (.json exportado desde este mismo programa).", true);
+                    }
+                };
+                reader.readAsText(file);
+                importTemplateInput.value = "";
+            });
+            $("#btnExportTemplate").addEventListener("click", exportTemplateFile);
+            $("#btnImportTemplate").addEventListener("click", importTemplateFile);
+            /* ============================ INICIO ============================ */
+            renderColumns();
+            renderRows();
+            renderCanvas();
+            renderProps();
+            renderLayers();
+            window.addEventListener("resize", renderCanvas);
+        })();
+    </script>
+</body>
+
+</html>

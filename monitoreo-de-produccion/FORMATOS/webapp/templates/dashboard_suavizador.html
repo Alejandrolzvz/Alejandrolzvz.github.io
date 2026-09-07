@@ -1,0 +1,100 @@
+{% extends 'base_home.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-speedometer2"></i> Dashboard de Suavizadores
+        <small class="fs-6 text-muted fw-normal">{{ fecha_inicio }} al {{ fecha_fin }}</small>
+    </h2>
+    <div class="d-flex align-items-center gap-2">
+        <form class="d-flex align-items-center gap-2" method="GET" action="{{ url_for('dashboard_suavizador') }}">
+            <label class="fw-bold text-muted mb-0">De:</label>
+            <input type="date" name="fecha_inicio" class="form-control border-primary shadow-sm" value="{{ fecha_inicio }}" style="width:150px;">
+            <label class="fw-bold text-muted mb-0">A:</label>
+            <input type="date" name="fecha_fin" class="form-control border-primary shadow-sm" value="{{ fecha_fin }}" style="width:150px;">
+            <label class="fw-bold text-muted mb-0">Planta:</label>
+            <select name="planta" class="form-select border-primary shadow-sm" style="width: 120px;">
+                <option value="">Todas</option>
+                <option value="Planta_A" {% if planta_seleccionada == 'Planta_A' %}selected{% endif %}>Planta_A</option>
+                <option value="Planta_B" {% if planta_seleccionada == 'Planta_B' %}selected{% endif %}>Planta_B</option>
+            </select>
+            <button type="submit" class="btn btn-primary shadow-sm">Consultar</button>
+            <a href="{{ url_for('dashboard_suavizador') }}" class="btn btn-outline-secondary shadow-sm" title="Ir a hoy">Hoy</a>
+        </form>
+        <a href="{{ url_for('suavizador_index') }}" class="btn btn-secondary shadow-sm">Volver a Bitácora</a>
+    </div>
+</div>
+
+<!-- TARJETAS DE INDICADORES (KPIs) -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card h-100 shadow border-0 rounded-4 bg-primary text-white bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Total de Muestras Registradas</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_monitoreos }}</h2>
+                <small class="mt-2 text-white-50"><i class="bi bi-clipboard-data"></i> Muestras de hoy</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100 shadow border-0 rounded-4 bg-info text-dark bg-gradient">
+            <div class="card-body d-flex flex-column justify-content-center align-items-center text-center">
+                <h6 class="card-title text-uppercase fw-light mb-1">Promedio de Gotas</h6>
+                <h2 class="display-4 fw-bold mb-0">{{ kpi_gotas }}</h2>
+                <small class="mt-2 text-dark-50">Concentración Promedio (5-30 rango típico)</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- GRÁFICOS -->
+<div class="row g-4 mb-5">
+    
+    <!-- Gráfico 1: Gotas por Muestra -->
+    <div class="col-lg-12">
+        <div class="card shadow-sm border-0 rounded-4 h-100">
+            <div class="card-header bg-white border-bottom-0 pt-4 pb-0">
+                <h5 class="fw-bold text-dark"><i class="bi bi-droplet-fill text-info"></i> Comportamiento de Gotas (Dureza) en Suavizadores</h5>
+            </div>
+            <div class="card-body" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="gotasSuavizadorChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Importar Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const labels = {{ chart_labels | safe }};
+    const cGotas = {{ chart_gotas | safe }};
+
+    const spanGaps = true;
+
+    // === GRÁFICA 1: GOTAS ===
+    const ctx1 = document.getElementById('gotasSuavizadorChart').getContext('2d');
+    new Chart(ctx1, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Cantidad de Gotas Medidas',
+                    data: cGotas,
+                    backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 2,
+                    borderRadius: 4
+                }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            scales: {
+                y: { type: 'linear', display: true, beginAtZero: true, title: { display: true, text: 'No. de Gotas' }, suggestedMax: 35 }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}
