@@ -1,5 +1,10 @@
 # Sistema de Gestión y Etiquetado de Equipos
 
+<p align="center">
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>
+
 Aplicación para registrar inventario técnico con datos consistentes y generar etiquetas con QR para facilitar la trazabilidad de equipos en campo.
 
 **[Abrir demo interactiva en GitHub Pages](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html)**
@@ -36,3 +41,8 @@ La demo pública funciona sin backend y usa datos inventados. El servidor local 
 - `frontend/`: interfaz de inventario y editor de etiquetas.
 - `demo-etiquetas/`: versión estática publicada en GitHub Pages.
 - `plantilla-etiqueta (7).json`: plantilla de referencia para el diseño.
+
+<p align="center">
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>

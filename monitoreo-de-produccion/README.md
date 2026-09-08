@@ -1,5 +1,10 @@
 # Sistema de Monitoreo de Producción
 
+<p align="center">
+   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>
+
 Plataforma web para digitalizar registros de producción industrial y convertir formatos físicos en datos estructurados, consultables y listos para análisis de calidad.
 
 ## Qué demuestra
@@ -80,3 +85,8 @@ Se requiere Python 3.8 o superior.
 ```
 
 Los scripts de conversión y la aplicación web se mantienen separados para distinguir la preparación de datos de la captura y consulta operativa.
+
+<p align="center">
+   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>

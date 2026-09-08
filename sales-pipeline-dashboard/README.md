@@ -1,5 +1,10 @@
 # Dashboard de Ventas y Eficiencia de Rutas
 
+<p align="center">
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>
+
 Dashboard analítico para explorar el desempeño comercial de rutas de campo y comparar ventas, visitas y conversiones por periodo, horario, segmento y unidad de negocio.
 
 **[Abrir demo estática en GitHub Pages](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html)**
@@ -46,3 +51,8 @@ Abre `http://localhost:8000/`. La demo pública no necesita PostgreSQL: usa un s
 - `index.html`: interfaz conectada a la API.
 - `DEMO_Dashboard_Ventas.html`: versión autocontenida para GitHub Pages.
 - `requirements.txt`: dependencias de ejecución.
+
+<p align="center">
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+</p>
