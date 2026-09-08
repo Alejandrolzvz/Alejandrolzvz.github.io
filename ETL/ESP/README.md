@@ -3,7 +3,7 @@
 <p align="center">
   <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
   <a href="../README.md"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
-  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL/ESP"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
 </p>
 
 Pipeline reproducible para extraer reportes comerciales, validarlos y cargarlos en PostgreSQL. Demuestra prácticas de ingeniería de datos aplicadas a ventas, clientes, direcciones y rutas operativas.
@@ -49,5 +49,5 @@ Las credenciales y los datos productivos no forman parte del repositorio.
 <p align="center">
   <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
   <a href="../README.md"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
-  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL/ESP"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
 </p>
