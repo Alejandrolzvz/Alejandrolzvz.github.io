@@ -1,8 +1,8 @@
 # Data Analytics Portfolio | Alejandro L.
 
 <p align="center">
-	<a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Open%20portfolio%20on%20Pages-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Open portfolio on Pages"></a>
-	<a href="./ESP/README.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in Spanish"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Open%20portfolio%20on%20Pages-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Open portfolio on Github"></a>
+	<a href="./ESP/"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in Spanish"></a>
 </p>
 
 Data analyst focused on turning operational information into reliable processes, clear metrics, and useful decision-making tools. This repository brings together projects in commercial analytics, data engineering, data quality, and operations digitization.
@@ -32,6 +32,6 @@ Each project describes the problem it solves, data flow, technical decisions, se
 To review the code, start with the project that interests you and open its README. The repository is designed to show both the visual result and the technical reasoning behind it.
 
 <p align="center">
-	<a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Open%20portfolio%20on%20Pages-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Open portfolio on Pages"></a>
-	<a href="./ESP/README.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in Spanish"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Open%20portfolio%20on%20Pages-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Open portfolio on Github"></a>
+	<a href="./ESP/"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in Spanish"></a>
 </p>
