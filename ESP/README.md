@@ -2,7 +2,7 @@
 
 <p align="center">
   <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-  <a href="../README.md"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
+  <a href="../"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
 </p>
 
 Analista de datos orientado a convertir información operativa en procesos confiables, métricas claras y herramientas útiles para la toma de decisiones. Este repositorio reúne proyectos de análisis comercial, ingeniería de datos, calidad de datos y digitalización de operaciones.
@@ -27,5 +27,5 @@ Cada proyecto incluye el problema que resuelve, el flujo de datos, las decisione
 
 <p align="center">
   <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-  <a href="../README.md"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
+  <a href="../"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
 </p>
