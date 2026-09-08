@@ -6,10 +6,10 @@ Analista de datos orientado a convertir información operativa en procesos confi
 
 | Proyecto | Qué demuestra | Acceso |
 | --- | --- | --- |
-| **[Dashboard de ventas y rutas](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard)** | KPIs comerciales, segmentación, análisis temporal, conversión y visualización interactiva. | [Abrir demo estática](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html) |
-| **[ETL de ventas y clientes](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL)** | Extracción y transformación eficiente con Polars, validaciones y carga incremental en PostgreSQL. | [Ver código y consultas](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/ETL) |
-| **[Monitoreo de producción](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion)** | Captura estructurada, extracción desde PDF, control de calidad y aplicación web modular. | [Ver proyecto](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion) |
-| **[Gestión y etiquetado de equipos](https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas)** | Estandarización de inventario, trazabilidad y generación de etiquetas con QR. | [Abrir demo](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html) |
+| **[Dashboard de ventas y rutas](./sales-pipeline-dashboard/)** | KPIs comerciales, segmentación, análisis temporal, conversión y visualización interactiva. | [Abrir demo estática](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html) |
+| **[ETL de ventas y clientes](./ETL/)** | Extracción y transformación eficiente con Polars, validaciones y carga incremental en PostgreSQL. | [Ver código y consultas](./ETL/) |
+| **[Monitoreo de producción](./monitoreo-de-produccion/)** | Captura estructurada, extracción desde PDF, control de calidad y aplicación web modular. | [Ver proyecto](./monitoreo-de-produccion/) |
+| **[Gestión y etiquetado de equipos](./equipos-y-etiquetas/)** | Estandarización de inventario, trazabilidad y generación de etiquetas con QR. | [Abrir demo](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html) |
 
 ## Competencias demostradas
 
