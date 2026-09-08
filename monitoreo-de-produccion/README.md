@@ -1,92 +1,68 @@
-# Sistema de Monitoreo de Producción
+# Production Monitoring System
 
 <p align="center">
-   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+  <a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>
 
-Plataforma web para digitalizar registros de producción industrial y convertir formatos físicos en datos estructurados, consultables y listos para análisis de calidad.
+Web platform for digitizing industrial production records and converting physical forms into structured, searchable data ready for quality analysis.
 
-## Qué demuestra
+## What it demonstrates
 
-- Extracción de tablas y métricas desde PDF hacia DataFrames y Excel.
-- Captura validada de parámetros operativos desde módulos separados por área.
-- Control de acceso por roles con Flask-Login.
-- Organización modular con Blueprints y despliegue reproducible mediante Docker.
+- Extraction of tables and metrics from PDF files into DataFrames and Excel.
+- Validated capture of operational parameters through area-specific modules.
+- Role-based access control with Flask-Login.
+- Modular Blueprints architecture and reproducible Docker deployment.
 
-## Flujo de datos
+## Data flow
 
-`PDF / registro operativo -> extracción y validación -> SQLite -> aplicación Flask -> consulta y seguimiento`
+`PDF / operational record -> extraction and validation -> SQLite -> Flask application -> monitoring and analysis`
 
 ## Stack
 
 **Backend:** Python, Flask, Werkzeug, Jinja2
-**Datos:** SQLite, Pandas, OpenPyXL, PDFPlumber
-**Despliegue:** Docker, Docker Compose y Waitress
+**Data:** SQLite, Pandas, OpenPyXL, PDFPlumber
+**Deployment:** Docker, Docker Compose, and Waitress
 
-## Configuración y uso
+## Setup and usage
 
-### Opción 1: Despliegue Rápido con Docker (Recomendado)
+### Option 1: Docker deployment
 
-Se requiere tener instalado [Docker](https://www.docker.com/) y `docker-compose`.
+Requires [Docker](https://www.docker.com/) and Docker Compose.
 
-1. Clona el repositorio:
-   ```bash
-   git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
-   cd monitoreo-de-produccion
-   ```
-2. Levanta el contenedor mediante Docker Compose:
-   ```bash
-   cd FORMATOS
-   docker-compose up -d --build
-   ```
-3. Abre `http://localhost:5000`.
-
-### Opción 2: instalación local con Python
-
-Se requiere Python 3.8 o superior.
-
-1. Clona el repositorio y navega al directorio de la aplicación:
-   ```bash
-   git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
-   cd monitoreo-de-produccion/FORMATOS/webapp
-   ```
-2. Crea y activa un entorno virtual:
-   ```bash
-   python -m venv venv
-   # En Windows: venv\Scripts\activate
-   # En Linux/Mac: source venv/bin/activate
-   ```
-3. Instala las dependencias:
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Configura las variables de entorno según `.env.example`.
-5. Inicializa la base de datos e inicia la aplicación:
-   ```bash
-   python app.py
-   ```
-6. Abre `http://localhost:5000` en el navegador.
-
-## Estructura del proyecto
-
-```text
-├── FORMATOS/
-│   ├── webapp/                 # Código fuente principal de la aplicación web (Flask)
-│   │   ├── app.py              # Punto de entrada de la aplicación
-│   │   ├── routes/             # Blueprints de las diferentes áreas operativas
-│   │   ├── templates/          # Plantillas HTML (Jinja2)
-│   │   ├── utils/              # Conexiones DB y modelos
-│   │   └── data/               # Archivos de la base de datos (SQLite)
-│   ├── convert_pdf_to_excel.py # Script ETL para extracción de tablas
-│   ├── docker-compose.yml      # Orquestación de contenedores
-│   └── ...
-└── README.md
+```bash
+git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
+cd Alejandrolzvz.github.io/monitoreo-de-produccion/FORMATOS
+docker-compose up -d --build
 ```
 
-Los scripts de conversión y la aplicación web se mantienen separados para distinguir la preparación de datos de la captura y consulta operativa.
+Open `http://localhost:5000`.
+
+### Option 2: Local Python setup
+
+Requires Python 3.8 or newer.
+
+```bash
+git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
+cd Alejandrolzvz.github.io/monitoreo-de-produccion/FORMATOS/webapp
+python -m venv venv
+pip install -r requirements.txt
+python app.py
+```
+
+Configure environment variables according to `.env.example`, then open `http://localhost:5000`.
+
+## Project structure
+
+- `FORMATOS/webapp/`: Flask application, routes, templates, utilities, and data.
+- `FORMATOS/convert_pdf_to_excel.py`: PDF table extraction script.
+- `FORMATOS/docker-compose.yml`: container orchestration.
+
+The conversion scripts and web application remain separate to distinguish data preparation from operational capture and querying.
 
 <p align="center">
-   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+  <a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/monitoreo-de-produccion"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>

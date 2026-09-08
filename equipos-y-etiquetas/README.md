@@ -1,28 +1,29 @@
-# Sistema de Gestión y Etiquetado de Equipos
+# Equipment Management and Labeling System
 
 <p align="center">
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+  <a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>
 
-Aplicación para registrar inventario técnico con datos consistentes y generar etiquetas con QR para facilitar la trazabilidad de equipos en campo.
+Application for recording technical inventory with consistent data and generating QR labels to support field equipment traceability.
 
-**[Abrir demo interactiva en GitHub Pages](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html)**
+**[Open the interactive demo on GitHub Pages](https://alejandrolzvz.github.io/equipos-y-etiquetas/demo-etiquetas/index.html)**
 
-## Qué demuestra
+## What it demonstrates
 
-- Captura estructurada de serie, marca, estado, cliente y dirección.
-- Búsqueda y filtrado de inventario para localizar equipos rápidamente.
-- Editor visual de etiquetas con campos dinámicos, capas, QR y vista previa.
-- API con FastAPI y autenticación basada en JWT para el flujo completo.
+- Structured capture of serial number, brand, status, customer, and address.
+- Inventory search and filtering for fast equipment lookup.
+- Visual label editor with dynamic fields, layers, QR codes, and preview.
+- FastAPI API with JWT-based authentication for the complete workflow.
 
 ## Stack
 
 **Backend:** Python, FastAPI, Pydantic, SQLAlchemy, JWT
-**Frontend:** HTML, CSS y JavaScript sin framework
-**Demo:** HTML estático y QRious con datos inventados
+**Frontend:** HTML, CSS, and framework-free JavaScript
+**Demo:** Static HTML and QRious with fictional data
 
-## Ejecución local
+## Local setup
 
 ```bash
 git clone https://github.com/Alejandrolzvz/Alejandrolzvz.github.io.git
@@ -31,18 +32,19 @@ pip install fastapi uvicorn pydantic sqlalchemy python-jose passlib[bcrypt]
 uvicorn backend.main:app --host 0.0.0.0 --port 9000
 ```
 
-En Windows también puedes ejecutar `iniciar_servidor.bat`. Después abre `http://localhost:9000`.
+On Windows, you can also run `iniciar_servidor.bat`. Then open `http://localhost:9000`.
 
-La demo pública funciona sin backend y usa datos inventados. El servidor local habilita la API y la persistencia configurada en el proyecto.
+The public demo runs without a backend and uses fictional data. The local server enables the API and the persistence configured in the project.
 
-## Archivos principales
+## Main files
 
-- `backend/`: API, autenticación, modelos, esquemas y acceso a datos.
-- `frontend/`: interfaz de inventario y editor de etiquetas.
-- `demo-etiquetas/`: versión estática publicada en GitHub Pages.
-- `plantilla-etiqueta (7).json`: plantilla de referencia para el diseño.
+- `backend/`: API, authentication, models, schemas, and data access.
+- `frontend/`: inventory interface and label editor.
+- `demo-etiquetas/`: static version published on GitHub Pages.
+- `plantilla-etiqueta (7).json`: reference design template.
 
 <p align="center">
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+  <a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+  <a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/equipos-y-etiquetas"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>

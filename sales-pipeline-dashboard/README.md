@@ -1,36 +1,37 @@
-# Dashboard de Ventas y Eficiencia de Rutas
+# Sales Performance and Route Efficiency Dashboard
 
 <p align="center">
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+	<a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+	<a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>
 
-Dashboard analítico para explorar el desempeño comercial de rutas de campo y comparar ventas, visitas y conversiones por periodo, horario, segmento y unidad de negocio.
+An analytical dashboard for exploring field-route performance and comparing sales, visits, and conversions by period, time slot, segment, and business unit.
 
-**[Abrir demo estática en GitHub Pages](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html)**
+**[Open the static demo on GitHub Pages](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html)**
 
-## Qué resuelve
+## What it solves
 
-- Convierte registros de recorridos en KPIs de ventas, visitas programadas, visitas realizadas y compras.
-- Permite analizar el desempeño por ruta, categoría, UDN, día, mes y franja horaria.
-- Facilita el ranking de rutas y la comparación entre segmentos para detectar oportunidades operativas.
-- Incluye exportación de datos a CSV y un snapshot HTML para compartir el análisis sin backend.
+- Converts route records into sales, scheduled visits, completed visits, and purchase KPIs.
+- Enables analysis by route, category, business unit, day, month, and time slot.
+- Supports route ranking and segment comparisons to identify operational opportunities.
+- Includes CSV export and an HTML snapshot that can be shared without a backend.
 
-## Flujo de datos
+## Data flow
 
 `PostgreSQL -> FastAPI -> Pandas -> API JSON -> HTML / Chart.js`
 
-El backend normaliza fechas y rutas, calcula agrupaciones temporales y devuelve una estructura lista para que el frontend filtre y visualice los indicadores.
+The backend normalizes dates and routes, calculates time-based aggregations, and returns a structure ready for frontend filtering and visualization.
 
 ## Stack
 
 **Backend:** Python, FastAPI, Uvicorn, Pandas, SQLAlchemy, PostgreSQL
 **Frontend:** HTML, Tailwind CSS, JavaScript, Chart.js
-**Publicación:** HTML estático compatible con GitHub Pages
+**Publishing:** Static HTML compatible with GitHub Pages
 
-## Ejecución local
+## Local setup
 
-Requiere Python y PostgreSQL.
+Requires Python and PostgreSQL.
 
 ```bash
 cd sales-pipeline-dashboard
@@ -41,18 +42,19 @@ set DATABASE_URL=postgresql://usuario:password@localhost:5432/tu_base_de_datos
 python app.py
 ```
 
-En Linux o macOS, sustituye la activación por `source venv/bin/activate` y configura `DATABASE_URL` con `export`.
+On Linux or macOS, use `source venv/bin/activate` and configure `DATABASE_URL` with `export`.
 
-Abre `http://localhost:8000/`. La demo pública no necesita PostgreSQL: usa un snapshot con datos de ejemplo y no representa una conexión en vivo.
+Open `http://localhost:8000/`. The public demo does not need PostgreSQL: it uses a snapshot with sample data and is not a live connection.
 
-## Archivos principales
+## Main files
 
-- `app.py`: API FastAPI, consulta a PostgreSQL y agregaciones de negocio.
-- `index.html`: interfaz conectada a la API.
-- `DEMO_Dashboard_Ventas.html`: versión autocontenida para GitHub Pages.
-- `requirements.txt`: dependencias de ejecución.
+- `app.py`: FastAPI API, PostgreSQL query, and business aggregations.
+- `index.html`: API-connected interface.
+- `DEMO_Dashboard_Ventas.html`: self-contained GitHub Pages version.
+- `requirements.txt`: runtime dependencies.
 
 <p align="center">
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Volver al portafolio"></a>
-	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/Ver%20proyecto%20en%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="Ver proyecto en GitHub"></a>
+	<a href="https://alejandrolzvz.github.io/"><img src="https://img.shields.io/badge/Back%20to%20portfolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Back to portfolio"></a>
+	<a href="README.es.md"><img src="https://img.shields.io/badge/Español-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Leer en español"></a>
+	<a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io/tree/main/sales-pipeline-dashboard"><img src="https://img.shields.io/badge/View%20project%20on%20GitHub-2563eb?style=for-the-badge&logo=github&logoColor=white" alt="View project on GitHub"></a>
 </p>
