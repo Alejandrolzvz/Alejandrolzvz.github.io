@@ -9,7 +9,7 @@ Data analyst focused on turning operational information into reliable processes,
 
 ## What you will find here
 
-| Proyecto | Qué demuestra | Acceso |
+| Project | Demonstrated Skills / Highlights | Links |
 | --- | --- | --- |
 | **[Sales and route dashboard](./sales-pipeline-dashboard/)** | Commercial KPIs, segmentation, time analysis, conversion, and interactive visualization. | [Open static demo](https://alejandrolzvz.github.io/sales-pipeline-dashboard/DEMO_Dashboard_Ventas.html) |
 | **[Sales and customer ETL](./ETL/)** | Efficient Polars transformations, validations, and incremental PostgreSQL loading. | [View code and queries](./ETL/) |
