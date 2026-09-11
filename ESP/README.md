@@ -1,4 +1,4 @@
-# Portafolio de Análisis de Datos | Alejandro L.
+# Portafolio de Análisis de Datos | Alejandro López V.
 
 <p align="center">
   <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Abrir portafolio en Github"></a>
