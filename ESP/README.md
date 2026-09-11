@@ -1,7 +1,7 @@
 # Portafolio de Análisis de Datos | Alejandro López V.
 
 <p align="center">
-  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Abrir portafolio en Github"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Ver%20portafolio%20en%20Github-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Abrir portafolio en Github"></a>
   <a href="../"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
 </p>
 
@@ -26,6 +26,6 @@ Analista de datos orientado a convertir información operativa en procesos confi
 Cada proyecto incluye el problema que resuelve, el flujo de datos, las decisiones técnicas, instrucciones de ejecución y sus limitaciones.
 
 <p align="center">
-  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Volver%20al%20portafolio-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Abrir portafolio en Github"></a>
+  <a href="https://github.com/Alejandrolzvz/Alejandrolzvz.github.io"><img src="https://img.shields.io/badge/Ver%20portafolio%20en%20Github-1f2937?style=for-the-badge&logo=github&logoColor=white" alt="Abrir portafolio en Github"></a>
   <a href="../"><img src="https://img.shields.io/badge/English-d97706?style=for-the-badge&logo=readme&logoColor=white" alt="Read in English"></a>
 </p>
